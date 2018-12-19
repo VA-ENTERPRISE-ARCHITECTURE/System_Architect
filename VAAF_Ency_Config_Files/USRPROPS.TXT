@@ -1,0 +1,2500 @@
+REM "VAAF USRPROPS.TXT"
+// Version 1.01 - Dec 2018  
+//UNDER NO CIRCUMSTANCES SHOULD THIS FILE BE EDITED OR REPLACED BY AN END USER!  
+//Please contact the appropriate office to request any edits. Changes may cause the encyclopedia to become unusable.
+//Required to Operate:  This USRPROPS and Proper use of the tool also depends on the accompanying USRMATRX.XML and USRDECLAR.CFG files being imported into the encyclopedia
+//as well as the accompanying SACONFIG.CFG. Explaination of these files, including this one, and how to import and enable them in the encyclopedia, are documented
+//in the tools help. (detail out of scope for comments)
+//Import/Update of VEAR data is done via custom VBA macros and CSV data load and that data is extracted from InQuisient (VEAR) via custom "filters" or queries.
+//Freezing of VEAR source primary definition types (Business Function, Organizational Unit and others) is assumed and to be done via macro.  Unfreezing is necessary to update
+
+//Version 1.01 Summary of Changes
+//Minor tweeks to unhide properties on system interface not meant to be hidden. Also added many display commands to allow for things like the full name of an item to be displayed
+//edited the ease model properties to allow technical capability type to be displayed and add software to technical capability type list
+//added an include file to hold the declare statements for conditional compiles so that the USRPROPS could remain static as it was updated across encyclopedias.
+//the USRDECLAR.CFG file holds the define state of the variables for an encyclopedia and the usrprops is compiled based on that. The USRPROPS does not need to be edited to set
+//the desired state for the variables - reducing error and versions of files.
+//System Data Exchange was added as a mirror relationship to System Interface - this allows for import or entry of data from either side.
+
+//Version 1.0 Summary of Capabilities and Changes
+//Includes updates to previous structures to eliminate copying too much detail from VEAR (and thus reduce maintenance and timliness risks) and to instead link to VEAR
+//for VEAR sourced items via a new "URL" that takes the user from that defintion screen to the apprpriate detail or Prism page in VEAR.  The URL is constructed in the
+//data extract queries in VEAR. Determination must be made, based on class type, as the the appropriate structure of the URL for VEAR. (detail out of scope for comments)
+//The link is created in the VEAR exports
+//Eliminated many definitions from previous versions that were intended to Mimic VEAR.  Also expanded both properties and relationships beyond the Stub-only approach.
+//Made the VEAR sourced propertes readonly as well as hiding them in the UI if there was no element id - or in other words, if the item is not from VEAR.
+//Adjusted the properties and relationships of those items sourced from VEAR to account for recent VEAR changes.
+//The VEAR Sourced definition types at this time are:  Business Function, Organizational Unit, System, External System, System Interface, Information Exchange, Data Store
+//Location, Portfolio, Product Line, System Component, Technology
+//All VEAR sourced items carry the VEAR unique ID called Element ID.  Some also have other identifiers that are used in VEAR.
+//Inheritance and Data Centricity is used throughout.  Superclasses are used to manage VEAR related items such as the Element ID so the property is inherited.
+//Data Centricity means that those relationships that are added, via the edit of a definition, import of data or drawing on a diagram, are the same thing and each affects the other
+//Special commands are used to conditionally compile certain properies for certain customers (compile time for the encyclopedia) and/or present properties based on
+//the presense or absense of a value (runtime).
+//Use of USER Definitions, Diagrams and Symbols are NOT in order or all grouped together.  This may be rearranged at a future time, however time constraints prevent that now.
+
+//VA Enterprise Archticture Framework (VAAF).  VAAF is, by direction, DoDAF2 informed, thus the DoDAF like naming convention and models.  However, DM2 conformance is not present
+//This is by design as DoDAF2 and DM2 are far too complex and not particularly compatible with VEAR structures.  The VAAF implementation was done to ensure use of the VEAR data.
+//Also used was BPMN and a bit of TOGAF, as well as experience and best practice..  Further expansion of the framework is anticipated.
+
+//Additional comments and specific information will be contained within comments for each appropriate entry below.
+
+//This USRPROPS will fail if TOGAF is turned on...so comment out whole thing if it gets turned on. System warns not to do so with encyclopedias properly configured.
+#ifndef "TOGAF 9"  
+//Conditional Compile Statements.  Define to make new properties and structures compile, undefine to comment out.  AGAIN---END USERS, DO NOT CHANGE---
+#INCLUDE "USRDECLAR.CFG"
+
+//Setup forced Diagram shows, which then forces definitions.  Try to hide some
+Show Diagram "Business Process"
+Hide Diagram "Business Process Hierarchy"
+Show Diagram "Organization Chart"
+Show Diagram "Enterprise Direction (Data Centric)"   //for OV-1
+Show Diagram "IDEF1X"
+Show Diagram "Entity Relation"
+Show Diagram "Physical Data Model"
+Show Diagram "StV-2 Capability Taxonomy"
+Show Diagram "OMT Event Trace"
+SHOW DIAGRAM "OMT State"
+//Show Diagram "406"
+
+Hide Diagram "Meta Model"
+#IFNDEF "Business Enterprise"
+Show Diagram "Network Concept"
+#ENDIF
+
+//Redirect UML To VASI Systems
+#IFDEF "UML Object-oriented"
+Symbol "System" in "Class" {Defined by "System"}  //Out of box these are defined by Business System.  Want System so it hooks to VASI systems in SA.
+Symbol "System" in "Use Case" {Defined by "System"}
+#ENDIF
+
+#IFNDEF "UML Object-oriented"
+Show Definition "420"
+Show Definition "Node"
+Show Definition "Component"
+Rename Definition "252" To "Old Component"
+Rename definition "404" To "Component"
+Show Definition "Component"
+Hide Definition "Old Component"
+#ENDIF
+#IFDEF "EASEModel"
+Show Definition "202"  //this is the old actor.  Cant use new one because it is a stereotype of class and introduces unwarranted complexity
+#endif
+Show Definition "113"	//this is the old Event
+//Attempt To Hide unwanted definitions; often does not work because of dependencies and order.
+Hide Definition "BSC Linkage"
+Hide Definition "BSC Linkage (Data Centric)"
+Hide Definition "BSC Theme"
+Hide Definition "BSC Perspective"
+Hide Definition "Function/Activity"
+Hide Definition "IDEF3 Constraint"
+Hide Definition "IDEF3 Fact"
+Hide Definition "IDEF3 Object"
+
+#ifdef "FEAF2"
+Hide Diagram "BMM Business Motivation"
+Hide Diagram "BMM Hierarchy"
+Hide Definition "BMM Assessment"
+Hide Definition "BMM Business Policy"
+Hide Definition "BMM Business Rule"
+Hide Definition "BMM Classifier"
+Hide Definition "BMM Course Of Action"
+Hide Definition "BMM Desired Result"
+Hide Definition "BMM Directive"
+Hide Definition "BMM End"
+Hide Definition "BMM Goal"
+Hide Definition "BMM Influencer"
+Hide Definition "BMM Means"
+Hide Definition "BMM Mission"
+Hide Definition "BMM Motivation Element"
+Hide Definition "BMM Objective"
+Hide Definition "BMM Potential Impact"
+Hide Definition "BMM Potential Reward"
+Hide Definition "BMM Regulation"
+Hide Definition "BMM Risk"
+Hide Definition "BMM Strategy"
+Hide Definition "BMM Tactic"
+Hide Definition "BMM Vision"
+#endif
+
+//Show Necessary Definitions
+
+
+REM "Issuing command to attempt to hide the meta-model diagram as creation of this diagram within the architecture itself creates a LOT of trash that adds no value"
+//HIDE Diagram "Meta Model"
+
+REM "***************************************************************************************************************************************************************"
+REM "*************************************************************  Diagram Renames  *******************************************************************************"
+REM "***************************************************************************************************************************************************************"
+//Rename Existing Diagrams
+Rename Diagram "Business Process" To "OV-6 Workflow (BPMN)"
+Rename Diagram "Organization Chart" To "OV-4 Organizational Relationships Chart"
+Rename Diagram "Enterprise Direction (Data Centric)" To "OV-1 High-Level Operational Concept Graphic"
+Rename Diagram "IDEF1X" To "DIV-2 Logical Data Model (IDEF1X)"
+Rename Diagram "Entity Relation" To "DIV-2 Logical Data Model (ERD)"
+Rename Diagram "Physical Data Model" To "DIV-3 Physical Data Model"
+#IFDEF "UML Object-oriented"
+Rename Diagram "Sequence" To "UML Sequence - OV6c, SV10c"  //From UML
+Rename Diagram "State" To "UML State: OV-6b, SV-10b" //From UML
+Rename Diagram "Class" To "UML Class: CV-1/2/3/4, OV-2/4, Div-1/2/3, PV-1/2"  //From UML
+Rename Diagram "Use Case" To "UML Use Case: OV-5, SV-4"
+Rename Diagram "Activity" To "UML Activity: OV-5/6a, SV-5, SV-8, SV-10a"
+Rename Diagram "Collaboration" To "UML Collaboration: SV-1/2"
+Rename Diagram "Component" To  "UML Component: SV-1"
+Rename Diagram "Deployment" To "UML Deployment: OV-2, SV-2"
+#ENDIF
+
+//#IFNDEF "UML Object-oriented"
+Rename Diagram "OMT Event Trace" To "SV-10c System Event-Trace Description"  //From OMT
+Rename Diagram "OMT State" To "SV-10b System State Transition Description" //From OMT
+//#ENDIF
+Rename Diagram "StV-2 Capability Taxonomy" To "CV-2 Capability Taxonomy"
+
+
+//Rename User Diagrams
+//Rename Diagram "User 1" to "OV-5 VA EA BRM Container View (MACRO-CREATE-ONLY)"
+Rename Diagram "User 2" To "SV-01 System Interface Description"
+Rename Diagram "User 3" to "SV-02 System Resource Description"
+Rename Diagram "User 4" to "OV-5 Operational Activity Tree"
+Rename Diagram "User 5" To "DIV-1 Conceptual Data Model"
+Rename Diagram "User 6" To "SV-04 Technical Capability Description"
+Rename Diagram "User 7" To "OV-2 Operational Resource Flow Description"
+Rename Diagram "User 8" To "CV-1 Vision"
+Rename Diagram "User 9" To "PV-1 Project Portfolio Relationships"
+Rename Diagram "User 10" To "AV-3 High Level Architecture"
+Rename Diagram "User 11" To "SV-04 Technical Capability Hierarchy"
+Rename Diagram "User 12" To "OV-5 VA EA BRM Hierarchy View (MACRO-CREATE-ONLY)"
+
+Rename relation "user 1" to "Has Partner 1"
+Rename relation "user 1 complement" to "is Partner 1 in"
+
+Rename relation "user 2" to "Has Partner 2"
+Rename relation "user 2 complement" to "is Partner 2 in"
+
+REM "***************************************************************************************************************************************************************"
+REM "*************************************************************  Symbol Renames  ********************************************************************************"
+REM "***************************************************************************************************************************************************************"
+
+REM "NEW************************************************************************************************************************************************************"
+REM "Some renames happen below to reduce conflicts caused by same name for a symbol appearing on another diagram besides the one meant"
+REM "***************************************************************************************************************************************************************"
+
+Rename Symbol "User 6" To "BusFunctPartOfBusFunct"
+Rename Symbol "User 7" To "CapabilityPartOfCapability"
+
+REM "***************************************************************************************************************************************************************"
+REM "*************************************************************  Definition Renames  ****************************************************************************"
+REM "Numbers are non-sequential because I am trying to avoid reusing old ones that are now removed so if for some reason this props file is put into an existing    "
+REM "encyclopedia things don't get very strange"
+REM "***************************************************************************************************************************************************************"
+#IF "'TOGAF 9' or FEAF2 or 'Business Motivation Model (BMM)'"
+Rename Definition "Organization Unit" To "Organizational Unit"
+#ENDIF
+
+#ifdef "TOGAF 9"
+	Rename Definition "Process" To "Process / Activity"  //for BPMN Process
+#ELSE
+	Rename Definition "BPMN Process" To "Process / Activity"  //for BPMN Process
+#endif
+//In Modaf or NAF this def is renamed.  VA does not own so not adding conditional statements.
+Rename Definition "Function" to "Technical Capability"
+Rename Definition "Data Flow" To "System Data Exchange"
+
+Rename Definition "User 1" to "VEAR Root"
+Rename Definition "User 2" To "Information Exchange Requirement"
+Rename Definition "User 3" to "System Component"
+Rename Definition "User 4" to "Business Function"
+//Rename Definition "User 5" to ""
+//Rename Definition "User 6" to "Technical Capability"
+Rename Definition "User 7" to "VA IT Asset"
+Rename Definition "User 8" to "VA Operational Action"
+//Rename Definition "User 9" to ""
+Rename Definition "User 10" To "Permitted Value"   ///for additional DGC structures, Search for DGC Modifications
+Rename Definition "User 11" To "Architecture Link"
+Rename Definition "User 12" To "Transfer Method"
+Rename Definition "User 13" To "Processing Type"
+
+Rename Definition "User 14" To "Needline"
+//Rename Definition "User 15" To ""
+Rename Definition "User 16" To "Facility"  //this is real property in IQ
+Rename Definition "User 17" To "Volume/Size"
+Rename Definition "User 18" To "Value List Member"
+Rename Definition "User 19" To "Product Line"
+//Rename Definition "User 20" To ""
+//Rename Definition "User 21" To "Security"
+Rename Definition "User 22" To "Information Exchange"
+//Rename Definition "User 23" To ""
+//Rename Definition "User 24" To ""
+Rename Definition "User 25" To "Portfolio"
+Rename Definition "User 26" To "VA Technology Action"
+Rename Definition "User 27" To "VA Information Asset"
+//Rename Definition "User 28" To ""
+//Rename Definition "User 29" To ""
+//Rename Definition "User 30" To ""
+//Rename Definition "User 31" To ""
+Rename Definition "User 32" To "System Communication"
+Rename Definition "User 33" To "System Interface"
+Rename Definition "User 34" To "External System"
+//Rename Definition "User 35" To ""
+//Rename Definition "User 36" To ""
+//Rename Definition "User 37" To ""
+//Rename Definition "User 38" To ""
+//Rename Definition "User 39" To ""
+//Rename Definition "User 40" To ""
+//Rename Definition "User 41" To ""
+
+//Vista Package is used by VHA so kept - same number as used in their USRPROPS config
+Rename Definition "User 42" To "VistA Package"
+
+// 43, 44, and 45 are used in timeline diagrams below.
+//Rename Definition "User 43" To ""
+//Rename Definition "User 44" To ""
+//Rename Definition "User 45" To ""
+Rename Definition "User 46" To "Data Concept"
+//Rename Definition "User 47" To ""
+//Rename Definition "User 48" To ""
+//Rename Definition "User 49" To ""
+
+
+#ifdef "IncludeFEAFMap"
+//really no need for the FEAF2 stuff in each encyclopedia.  Can turn on separately if necessary later but segment encyclopeidas should inherit via VEAR
+#ifndef "FEAF2"
+RENAME DEFINITION "SERVICES_14" TO "FEAF2 DRM Topic"				REM "1487"
+Show Definition "FEAF2 DRM Topic"
+RENAME DEFINITION "SERVICES_11" TO "FEAF2 BRM Service"				REM "1484"
+Show Definition "FEAF2 BRM Service"
+RENAME DEFINITION "SERVICES_5" TO "FEAF2 PRM Measurement Category"	REM "1478"
+Show Definition "FEAF2 PRM Measurement Category"
+#endif
+
+Rename Definition "User 75" To "FEAF2 DRM Topic - Data Store"
+
+#Endif
+
+
+//*********************************************************Lists************************************************************************
+List "Abstraction Level"
+{
+	Value "Conceptual (High Level)"
+	Value "Logical (Mid-Level)"
+	Value "Physical (Detailed)"
+}
+
+List "Exchange Protocol"
+{
+	Value "FTP"
+	Value "HTTP(S)"
+	Value "JMS"
+	Value "MLLP"
+	Value "SFTP"
+	Value "SMTP"
+	Value "SOAP"
+	Value "SOAP/HTTP(S)"
+	Value "SOAL/SSL"
+	Value "TCP/IP"
+	Value "TCP/IP (Socket)"
+}
+List "Federation Mapping Type"
+{
+	Value "Same"
+	Value "Part of"
+	Value "Type of"
+	Value "Gap"
+}
+
+List "Interface Frequency"
+{
+	Value "Ad hoc"
+	Value "Varies"
+	Value "Annually"
+	Value "Weekly"
+	Value "Bi-weekly"
+	Value "Daily"
+	Value "Hourly"
+	Value "Monthly"
+	Value "Other (Provide Free-Text Field Entry)"
+}
+
+List "Sender Types"
+{
+	Value "System Partner 1"
+	Value "System Partner 2"
+}
+
+List "System Component Type"
+{
+	Value "Application Module"
+	Value "Utility"
+	Value "Website"
+}
+List "Component Type"
+{
+	Value "Logical"
+	Value "Physical"
+	Value "Unspecified"
+}
+List "Technical Capability Type"
+{
+	Value "Business Logic"
+	Value "Business Information"
+	Value "Interface"
+	Value "Software"
+	Value "N/A"
+}
+List "Software Type"
+{
+	Value "COTS"
+	Value "Custom Development"
+}
+//*********************************************************Definitions************************************************************************
+Definition "VEAR Root"
+{
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE READONLY Help " READONLY - The ID from VEAR for this item."}
+	Property "Class Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READONLY - The Class ID from VEAR for this item"}
+	CHAPTER "Business Rules"
+	Property "Business Rules" {Edit ListOf "Business Rule" ASGRID Help "Applicable Business Rules" }
+}
+Definition "VA IT Asset"
+{
+	SUBTYPE OF "VEAR Root"
+	CHAPTER "VAAF"
+	Group "" {
+	Property "PartOfNodes" {Edit HeterogeneousListOf  "Node" AND_SUBTYPES READONLY}
+	}
+}
+Definition "VA Operational Action"
+{
+	SUBTYPE OF "VEAR Root"
+}
+Definition "VA Technology Action"
+{
+	SUBTYPE OF "VEAR Root"
+}
+Definition "VA Information Asset"
+{
+	SUBTYPE OF "VEAR Root"
+}
+Definition "Node"
+{
+	SUBTYPE OF "VEAR Root"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmOperationalNode.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\dmOperationalNode.bmp"  }
+	CHAPTER "VAAF"
+	Property "Business Functions" {Edit ListOF "Business Function" DISPLAY{ FORMAT ListNameOnly LEGEND "Business Functions" } FROM_CHOICES_ONLY }  //for VAAF
+}
+
+Definition "Data Store"  //Default SA object shared by multiple methods
+{
+	SUBTYPE OF "VEAR Root"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\data.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\data.bmp"  }
+	Property "Description" {INVISIBLE}
+	Property "Normalize" {INVISIBLE}
+	Property "Volume" {INVISIBLE}
+
+	Property "Text Description" {ZOOMABLE Edit Text Length 4000 Lines 5 Label "Description"}
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 Help "Enter a Long Name if applicable" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	Property "ATTENTION" {Zoomable Edit Text Length 2500 Default "Additional information and mappings to other EA Data may only be added/edited in VEAR. Please follow appropriate procedures to enter/update the Data Store in VEAR." READONLY}
+	
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Data Store ID" {Edit Text Length 100 INVISIBLE HELP "Enter ID" READONLY}
+	Control "Full Name" {REFPROP "Full Name" READONLY Help "READ-ONLY Full length name from VEAR"}
+	Control "Text Description" {REFPROP "Text Description" READONLY}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY Link to VEAR for more info."}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+
+Definition "Technology"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\exp_technology.wmf"  MENU "images\exp_technology.bmp" }
+	SUBTYPE OF "VEAR Root"
+	Property "In Service Date" {INVISIBLE}
+	Property "Related UOBs" {INVISIBLE}
+	CHAPTER "Matrix" HIDE
+
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	Property "Description" {ZOOMABLE EDIT Text LENGTH 4000 LINES 5}
+
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Control "Full Name" {REFPROP "Full Name" READONLY Help "READ-ONLY Full length name from VEAR"}
+	Control "Description"	{ REFPROP "Description" READONLY HELP "READ-ONLY"}
+	Property "Technology ID" {Edit Text Length 100 INVISIBLE READONLY HELP "READ-ONLY"}
+	Property "TRM ID" {Edit Text Length 100 READONLY}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+
+Definition "Information Exchange"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\exp_application_interface.wmf"  MENU "images\exp_application_interface.bmp" }
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE READONLY}   //cannot inherit because keyed
+	Property "Class Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READONLY - The Class ID from VEAR for this item"}
+	Chapter "Introduction"
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5}
+	//Property "Implements IER(s)" {Edit ListOf "Information Exchange Requirement"}
+	Property "System Interface" {key Edit OneOf "System Interface" }
+	
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Sender (VASI)" {Edit Text Length 100 READONLY HELP "READ-ONLY"}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+Definition "System Data Exchange"
+{       NODESCRIPTION
+	CHAPTER "Introduction"
+	PROPERTY "Text Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5 Label "Description"}
+	//PROPERTY "Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5}
+	Property "System Interface" {EDIT OneOf "System Interface" Mirrors "System Data Exchanges"}
+	Property "Implements IER(s)" {Edit ListOf "Information Exchange Requirement"}
+	PROPERTY "From Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "None"    LENGTH 30 INVISIBLE  FROMTAG}
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd3"    LENGTH 30 INVISIBLE  TOTAG}
+	Group "Participants"
+	{
+		Property "From" {Edit HETEROGENEOUSONEOF "Technical Capability", "External System", "Data Store", "VA IT Asset" AND_SUBTYPES FROMDEF }
+		Property "To" {Edit HETEROGENEOUSONEOF "Technical Capability", "External System", "Data Store", "VA IT Asset" AND_SUBTYPES TODEF }
+	}
+	Chapter "Exchange Information"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "Sender" {EDIT Text ListOnly List "Sender Types" Default "" Help "Indicate the source of this exchange across the interface."}
+	Property "Data Format/File Layout" {Edit Text Length 2000}
+	Property "Data Description" {Edit Text Length 2000}
+	Property "Data" {Edit HeterogeneousListOf "Attribute", "Class Attribute", "Data Element", "Data Structure" HELP "From the DIV-2"}
+}
+
+Definition "System Interface" RELATIONSHIP LABEL "SystemPartner1-SystemPartner2" REVERSELABEL "SystemPartner2-SystemPartner1"
+{
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READ-ONLY The ID from VEAR for this item."}
+	Property "Class Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READ-ONLY The Class ID from VEAR for this item"}
+	Chapter "Introduction"
+	PROPERTY "Text Description" { ZOOMABLE EDIT Text LENGTH 4000 LINES 5}
+	Property "Implements Needline(s)" {Edit ListOf "Needline"}
+	CHAPTER "Participants"
+	Group "Participants"
+	{
+		Property "System Partner 1" {Edit HETEROGENEOUSONEOF "VA IT Asset" AND_SUBTYPES, "External System", "Node" AND_SUBTYPES RELATED BY "Has Partner 1" FromDef}  //, "Node" AND_SUBTYPES
+		Property "System Partner 2" {Edit HETEROGENEOUSONEOF "VA IT Asset" AND_SUBTYPES,"External System", "Node" AND_SUBTYPES RELATED BY "Has Partner 2" TODEF}   //, "Node" AND_SUBTYPES
+	}
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR"}
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5 READONLY HELP "READ-ONLY"}
+	Property "System Interface ID" {Edit Text Length 100 INVISIBLE READONLY HELP "READ-ONLY"}
+	Property "Information Exchanges" {Edit Complete ListOf "Information Exchange" KEYED BY {"System Interface":Name, Name } HELP "Use to specify specific exchanges" DISPLAY{ FORMAT ListNameOnly LEGEND "$$NONE$$" } ASGRID READONLY}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+
+	Chapter "Interface Info"
+	//{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Group "Transfer Method"
+	{
+		LAYOUT { ALIGN OVER }
+		Property "Transfer Method" {Edit OneOf "Transfer Method" }
+		Property "Transfer Method Notes" {Edit Text Length 250}
+	}
+	Group "Processing Model"
+	{
+	LAYOUT { ALIGN OVER }
+		Property "Processing Type" {Edit OneOf "Processing Type" }
+		Property "Processing Notes" {Edit Text Length 250}
+	}
+	Group "Frequency"
+	{
+	LAYOUT { ALIGN OVER }
+		Property "Interface Frequency" {Edit Text ListOnly List "Interface Frequency" Default "Other (Provide Free-Text Field Entry)" UNORDERED }
+		Property "Frequency Notes" {Edit Text Length 250}
+	}
+	Group "Volume/Size"
+	{
+	LAYOUT { ALIGN OVER }
+		Property "Volume/File Size" {Edit OneOf "Volume/Size" }
+		Property "Volume/File Sizes Notes" {Edit Text Length 250}
+	}
+
+	Property "Error Handling Process" {Edit Text Length 2000}
+	Property "Source" {Edit Text Length 1000}
+	Property "Notes" {Edit Text Length 2000}
+
+	Chapter "Class & Data Exchanges"
+	//{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Class Exchanges" {Edit HeterogeneousListOf "Data Concept","Entity", "Class" Display {Format LIST Legend "DIV-1/2" } Help "Use to specify high level exchanges" }
+	Property "System Data Exchanges" {Edit ListOf "System Data Exchange" Mirrors "System Interface" Help "Use to specify detailed SV-4 exchanges" Display {Format LIST Legend "System Data Exchanges" }}
+}
+
+Definition "System Communication" RELATIONSHIP LABEL "SystemPartner1-SystemPartner2" REVERSELABEL "SystemPartner2-SystemPartner1"
+{
+	Chapter "Introduction"
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5}
+	Group "Participants"
+	{
+	Property "System Partner 1" {Edit HETEROGENEOUSONEOF "External System", "Node", "Communication Node", "Technology", "VA IT Asset" AND_SUBTYPES FROMDEF }
+	Property "System Partner 2" {Edit HETEROGENEOUSONEOF "External System", "Node", "Communication Node", "Technology", "VA IT Asset" AND_SUBTYPES TODEF }
+	}
+}
+
+Definition "External System"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\exp_external.wmf"  MENU "images\exp_external.bmp" }
+	SUBTYPE OF "VEAR Root"
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Description" {Zoomable Edit Text Length 4000 Lines 5}	
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	Control "Description"	{ REFPROP "Description" READONLY HELP "READ-ONLY"}
+	Property "External System ID" {Edit Text Length 100 INVISIBLE READONLY HELP "READ-ONLY"}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+
+Definition "Product Line"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\CommonDesktop.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\CommonDesktop.bmp"  }
+	SUBTYPE OF "VEAR Root"
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Description" {Zoomable Edit Text Length 4000 Lines 5}
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	Control "Description"	{ Refprop "Description" READONLY HELP "READ-ONLY"}
+	Property "Portfolio" {Edit OneOf "Portfolio" READONLY HELP "READ-ONLY" DISPLAY {FORMAT STRING LEGEND "Portfolio"}}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+
+}
+
+Definition "System"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\Computer_Server.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\Computer_Server.bmp"  }
+	SUBTYPE OF "VA IT Asset"
+	
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	PROPERTY "Description"	{ ZOOMABLE LINES 5 READONLY HELP "READ-ONLY"}
+	Group "VEAR Readonly Data"
+	{
+		Property "System Acronym" {Edit Text Length 100 Lines 1 READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "$$NONE$$" }}
+		Property "System ID" {Edit Numeric Length 100 Lines 1 READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "VASI ID" }}
+		Property "EPMD Portfolio" {Edit Text Length 500 Lines 1 READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "EPMD Portfolio"}}
+		Property "AMO/ITAM Portfolio" {Edit Text Length 500 Lines 1 READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "AMO/ITAM Portfolio"}}
+		Property "System Status" {Edit Text Length 500 Lines 1 READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "System Status"}}
+		Property "Software Type" {Edit Text Length 100 Lines 1 READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "Software Type"}}
+		Property "Qualified Name" {Edit Text Length 250 Lines 1 READONLY HELP "READ-ONLY" }
+		Property "Product Line" {Edit OneOf "Product Line" READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "Product Line" }}
+	}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+	
+	Chapter "VEAR Relationships"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "Sponsor Organizational Unit" {Edit OneOf "Organizational Unit" READONLY HELP "READ-ONLY" REQUIRED }
+	Property "Parent System" {Edit OneOf "System" READONLY HELP "READ-ONLY" }
+	Property "Business Functions" {Edit ListOf "Business Function" Mirrors "Systems" READONLY HELP "READ-ONLY" ASGRID DISPLAY{ FORMAT ListNameOnly LEGEND "Business Functions" }}
+	
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	//Property "WARNING" {Zoomable Edit Text Length 2500 Default "Systems may only be added/edited in VASI.  Any entry here is ignored and subject to deletion" READONLY}
+	Property "System Description" {Zoomable Edit Text Length 2500}
+	Group "Required Fields"
+	{
+		LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+		Control "Sponsor Organization" {REFPROP "Sponsor Organizational Unit"}
+		//Property "Technical POC" {Edit Text Length 200 Lines 1 INITIAL USER REQUIRED}
+		//Property "System Registrant POC" {Edit Text Length 200 Lines 1 REQUIRED}
+		//Property "System Registrant Email" {Edit Text Length 200 Lines 1 REQUIRED}
+		//Property "System Registrant Phone" {Edit Text Length 200 Lines 1 REQUIRED}
+	}
+	//Property "Suggested System Status" {Edit Text ListOnly List "Suggested System Status"}
+	//Property "Suggested System Status Notes" {Edit Text Length 3000 Lines 3}
+	Property "Acronym" {Edit Text Length 20}
+	Property "Software Type " {Edit Text ListOnly List "Software Type"}
+	Property "Business Sponsor" {Edit Text Length 200}
+	Property "Is External Facing?" {Edit Boolean Default "F"}
+	Property "Accreditation Boundaries" {Edit Text Length 2000 Lines 3}
+	Property "Project Name" {Edit Text Length 200}
+	Property "Project EPS Code" {Edit Text Length 200}
+	Property "Hosting Locations" {Edit Text Length 3000 Lines 3}
+	Property "Business Product Manager" {Edit Text Length 200}
+	Property "Data Steward" {Edit Text Length 200}
+	Property "Sustainment Manager" {Edit Text Length 200}
+	Property "Project Manager" {Edit Text Length 200}
+	Property "FISMA System Owner" {Edit Text Length 200}
+	Property "Information Security Officer" {Edit Text Length 200}
+	Property "Hosting Manager" {Edit Text Length 200}
+	Property "Operations Manager" {Edit Text Length 200}
+	Property "OIT Product Manager" {Edit Text Length 200}
+	Property "System Technology" {Edit Text Length 3000 Lines 3}
+}
+
+Definition "Organizational Unit"
+{
+	SUBTYPE OF "Node"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmOrganization.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\dmOrganization.bmp"  }
+	Property "Parent" {INVISIBLE}
+	Property "Sub-Organization Unit" {INVISIBLE}
+	
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LINES 5 READONLY HELP "READ-ONLY"}
+	Property "Organization ID" {Edit Text Length 100 READONLY HELP "READ-ONLY" INVISIBLE}
+	Property "FOM UID" {Edit Text Length 100 READONLY HELP "READ-ONLY" INVISIBLE}
+	Property "Organizational Unit Acronym" {Edit Text Length 20 READONLY HELP "READ-ONLY" DISPLAY{ FORMAT String LEGEND "$$NONE$$" }}
+	Property "Parent 0 Organizational Unit" {Edit Oneof "Organizational Unit" READONLY HELP "READ-ONLY" Label "Administration/Staff Office"}
+	Property "Parent Organizational Unit" {Edit Oneof "Organizational Unit" READONLY HELP "READ-ONLY"}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+
+	Chapter "VEAR Relationships"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "Business Functions" {Edit ListOF "Business Function" Mirrors "Organizational Units" DISPLAY{ FORMAT ListNameOnly LEGEND "Business Functions" } READONLY HELP "READ-ONLY" }
+	
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "WARNING" {Zoomable Edit Text Length 2500 Default "Organizational Units may only be added/edited in VEAR.  Any entry here will be ignored and is subject to deletion." READONLY}
+}
+
+Definition "Business Function"
+{
+	SUBTYPE OF "VA Operational Action"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\Blue Beveled Rectangle.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\Blue Beveled Rectangle.bmp"  }
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5 READONLY HELP "READ-ONLY"}
+	Property "Business Function ID" {Edit Text Length 100 INVISIBLE READONLY HELP "READ-ONLY"}
+	Property "IFAM Activity Number" {Edit Text Length 100 INVISIBLE READONLY HELP "READ-ONLY"}
+	Group "VEAR Readonly Data"
+	{
+		Property "Business Function Level" {Edit Numeric Length 20 Lines 1 DISPLAY{ FORMAT String LEGEND "$$NONE$$" } HELP "As imported from VEAR" READONLY HELP "READ-ONLY"}
+		Property "Hierarchy Number" {Edit Text Length 100 Lines 1 HELP "As imported from VEAR" READONLY HELP "READ-ONLY" Display {Format SCRIPT FmtBRMNameHierarchyAttr Legend "$$NONE$$"}}
+		Property "Sequence" {Edit Numeric READONLY HELP "READ-ONLY"}
+		Property "Number of Related Systems"  {Edit Text Length 5 Lines 1 Display {Format String Legend "Number of Related Systems"} HELP "This value is imported from VEAR" READONLY}
+		Property "Enterprise or Owning Segment" {Edit Text Length 120 Lines 1 READONLY HELP "READ-ONLY Use via Heatmap for color Coding"}   //Used to automate color coding via heatmap
+	}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+
+	Property "BRM Display" {Edit Boolean Default "T" READONLY HELP "READ-ONLY"}
+	Property "Source" {Edit Text Length 2000 Lines 3 READONLY HELP "READ-ONLY"}
+	Property "Sort Hierarchy Number" {Edit TEXT Length 150 INVISIBLE READONLY HELP "READ-ONLY"}
+	Chapter "VEAR Relationships"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "Parent Business Function" {Edit OneOf "Business Function" READONLY HELP "READ-ONLY"}
+	Property "Organization" {Edit OneOf "Organizational Unit" READONLY HELP "READ-ONLY"}
+	Property "Systems" {Edit ListOf "System" Mirrors "Business Functions" DISPLAY{ FORMAT ListNameOnly LEGEND "Related Systems" } READONLY HELP "READ-ONLY" ASGRID }
+	Property "Organizational Units" {Edit ListOf "Organizational Unit" Mirrors "Business Functions" READONLY HELP "READ-ONLY" ASGRID}
+
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "WARNING" {Zoomable Edit Text Length 2500 Default "Business Functions may only be added/edited via the official change process in VEAR.  Any entry here will be ignored and is subject to deletion." READONLY}
+}
+
+Definition "Process / Activity"
+{
+	SUBTYPE OF "VA Operational Action"
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LINES 5}
+
+	CHAPTER "Hierarchy"
+	Property "Parent" {Edit HeterogeneousOneOf "Business Function", "Process / Activity"}
+
+	#IFDEF "EASEModel"
+	CHAPTER "EASEModel"
+	Property "Business Functions" {Edit ListOf "Business Function"}
+	#ENDIF
+}
+
+Definition "Location"
+{	
+	SUBTYPE OF "Node"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmLocation.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\dmLocation.bmp"  }
+	Property "Node Type" {INVISIBLE}
+	Property "In Service Date" {INVISIBLE}
+		Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Description" {Zoomable Edit Text Lines 5}
+
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	CONTROL "Description"	{ REFPROP "Description" READONLY HELP "READ-ONLY"}
+	Property "Location ID" {Edit Text Length 100 INVISIBLE READONLY HELP "READ-ONLY"}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+
+Definition "Facility"
+{
+	SUBTYPE OF "Node"
+	DEPICTIONS {diagram Retain Style "images\building.wmf" borders { 1, 2, 1, 2 }	menu "images\building.bmp" }
+	
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Description" {Zoomable Edit Text Length 4000 Lines 5}
+
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	CONTROL "Description"	{ REFPROP "Description" READONLY HELP "READ-ONLY"}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+
+Definition "Geographic Location"
+{
+	SUBTYPE OF "Node"
+	DEPICTIONS {diagram Retain Style "images\building.wmf" borders { 1, 2, 1, 2 }	menu "images\building.bmp" }
+	
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Description" {Zoomable Edit Text Lines 5}
+
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	CONTROL "Description"	{ REFPROP "Description" READONLY HELP "READ-ONLY"}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+
+Definition "Project"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmProject.wmf"  MENU "images\dmProject.bmp" }
+	SUBTYPE OF "VEAR Root"
+}
+
+Definition "Portfolio"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\BMM_assessmentcategory_dgm.wmf"  MENU "images\BMM_assessmentcategory_dgm.bmp" }
+	SUBTYPE OF "VEAR Root"
+
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Description" {Zoomable Edit Text Length 4000 Lines 5}
+
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	Control "Description" { REFPROP "Description" READONLY HELP "READ-ONLY"}
+	Property "Portfolio ID" {Edit Text Length 100 INVISIBLE READONLY HELP "READ-ONLY"}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+
+	Chapter "VEAR Relationships"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Parent Portfolio" {Edit OneOf "Portfolio" READONLY HELP "READ-ONLY"}
+}
+
+Definition "Data Concept"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmInformation.wmf"  MENU "images\dmInformation.bmp" }
+	SUBTYPE OF "VA Information Asset"
+	Property "ID" {Edit Text Length 250}
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5}
+	Property "Related Data Concepts" {Edit ListOf "Data Concept"}
+	Chapter "DIV-2"
+	Property "Related DIV-2 Items" {Edit HeterogeneousListOf "Entity", "Class" Display {Format LIST Legend "DIV-2"}}
+}
+
+Definition "Participant"
+{
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LINES 5}
+	PROPERTY "Participant" { EDIT HETEROGENEOUSONEOF "System", "External System" REQUIRED Label "Lane/Pool Represents" Help "Mapping to item the participant represents"}
+}
+
+Definition "Information Exchange Requirement"
+{
+	NODESC
+	Property "Purpose" {Lines 5}
+	Property "Detail Level" {Edit Text ListOnly List "Abstraction Level" Default "Conceptual (High Level)" Help "Choose the detail level and click APPLY." UNORDERED }	
+	Chapter "Conceptual IER"
+	{TestProc TestPropertyValue TESTPROPERTY "Detail Level" TESTSTRING { "Conceptual (High Level)" }}
+	Property "Information Concepts" {Edit HeterogeneousListOf "Project Data Model", "Data Concept" Display {Format LIST Legend "Information Concepts"}}
+	Chapter "Logical IER"
+	{TestProc TestPropertyValue TESTPROPERTY "Detail Level" TESTSTRING { "Logical (Mid-Level)" }}
+	Property "Information" {Edit HeterogeneousListOf "Entity", "Class" Display {Format LIST Legend "Information"}}
+	Chapter "Physical IER"
+	{TestProc TestPropertyValue TESTPROPERTY "Detail Level" TESTSTRING { "Physical (Detailed)" }}
+	Property "Data" {Edit HeterogeneousListOf "Attribute", "Class Attribute", "Data Element", "Data Structure"}
+	
+	Chapter "Participants"
+	Group ""
+	{
+	Property "From" {Edit HETEROGENEOUSONEOF "BPMN Event", "Business Function", "Process / Activity" AND_SUBTYPES FROMDEF }  //Possible Edit
+	Property "To" {Edit HETEROGENEOUSONEOF "BPMN Event", "Business Function", "Process / Activity" AND_SUBTYPES TODEF }	//Possible Edit
+	}
+}
+
+Definition "Needline" RELATIONSHIP LABEL "Node1-Node2" REVERSELABEL "Node2-Node1"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\exp_application_interface.wmf"  MENU "images\exp_application_interface.bmp" }
+	Property "Detail Level" {Edit Text ListOnly List "Abstraction Level" Default "Conceptual (High Level)" Help "Choose the detail level and click APPLY." UNORDERED }	
+	Chapter "Conceptual"
+	{TestProc TestPropertyValue TESTPROPERTY "Detail Level" TESTSTRING { "Conceptual (High Level)" }}
+	Property "Information Concepts" {Edit ListOf "Data Concept" Display {Format LIST Legend "Information Concepts"}}
+	Chapter "Logical"
+	{TestProc TestPropertyValue TESTPROPERTY "Detail Level" TESTSTRING { "Logical (Mid-Level)" }}
+	Property "Information" {Edit HeterogeneousListOf "Entity", "Class" Display {Format LIST Legend "Information"}}
+	Chapter "Physical (IERs)"
+	{TestProc TestPropertyValue TESTPROPERTY "Detail Level" TESTSTRING { "Physical (Detailed)" }}
+	Property "IERs" {Edit ListOf "Information Exchange Requirement" Display {Format LIST Legend "IERs"}}
+
+	Chapter "Participants"
+	Group ""
+	{
+	Property "From" {Edit HETEROGENEOUSONEOF "Node" AND_SUBTYPES FROMDEF }
+	Property "To" {Edit HETEROGENEOUSONEOF "Node" AND_SUBTYPES TODEF }
+	}
+}
+
+Definition "Technical Capability"
+{
+	Property "Minispec" {INVISIBLE}
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmSystemFunction.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\dmSystemFunction.bmp"  }
+	SUBTYPE OF "VA Technology Action"
+	Property "Capability Type" {Edit Text ListOnly List "Technical Capability Type" Default "N/A" Help "Choose the Capability Type and click APPLY." UNORDERED 
+		DISPLAY {FORMAT STRING LEGEND "Capability Type"}}
+	Property "Performed by" {Edit HeterogeneousListOf "VA IT Asset" AND_SUBTYPES  }
+	Property "Parent Capability" {Edit OneOf "Technical Capability"}
+	Chapter "SV-5"
+	Property "Business Functions" {Edit ListOf "Business Function" FROM_CHOICES_ONLY }
+	Chapter "Dependencies"
+	Property "Depends On Technical Capability" {Edit ListOf "Technical Capability" }
+
+	Chapter "Business Logic"
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Business Logic" }}
+	#IFDEF "UML Object-oriented"
+		Property "Activities" {Edit HeterogeneousListOf "Process / Activity", "Action State"}  //allow adding action states from UML activity diagrams
+	#ELSE
+		Property "Activities" {Edit ListOf "Process / Activity"}
+	#ENDIF
+	Chapter "Business Information"
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Business Information" }}
+	Property "Concept" {Edit HeterogeneousListOf "VA Information Asset" AND_SUBTYPES}
+
+	Chapter "Interface"
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Interface" }}
+	Property "Interface Description" {Edit TEXT Length 2000 Lines 5}
+
+	Chapter "Software"
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Software" }}
+	Property "Software Capability Description" {Edit TEXT Length 2000 Lines 5}
+	
+	#IFDEF "EASEModel"
+	CHAPTER "VHA Alignment"
+	Property "VHA Business Service" {Edit ListOf "User 112"}
+	#ENDIF
+}
+
+//*********************************************************Diagrams and Symbols***************************************************************
+
+REM "***************************************************************************************************************************************************************"
+REM "Symbols Added to diagram in reverse order of appearance left to right   Lines always first on the left - but in reverse order"
+REM "***************************************************************************************************************************************************************"
+SYMBOL "User 8"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS EXPLICIT RELATIONSHIP "System Interface" AND_SUBTYPES
+	Assign To "SV-01 System Interface Description"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+}
+SYMBOL "User 5"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS EXPLICIT RELATIONSHIP "System Communication" AND_SUBTYPES
+	Assign To "SV-02 System Resource Description"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+}
+SYMBOL "User 18"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS EXPLICIT RELATIONSHIP "System Data Exchange" AND_SUBTYPES
+	Assign To "SV-04 Technical Capability Description"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd3"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+}
+Symbol "User 22"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS EXPLICIT RELATIONSHIP "Information Exchange Requirement" AND_SUBTYPES
+	Assign To "OV-2 Operational Resource Flow Description"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+
+}
+Symbol "User 21"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS EXPLICIT RELATIONSHIP "Needline" AND_SUBTYPES
+	Assign To "OV-2 Operational Resource Flow Description"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+
+}
+
+REM "***************************************************************************************************************************************************************"
+REM "Symbols - Renamed later - aids in compatibility and reduction of errors.  Also trying to keep in an order that is from right to left on diagrams"
+REM "Uses the Depiction of 'External' in 'System Context' - using symbol type number so that if the diagram is 'Off' it will still work"
+REM "***************************************************************************************************************************************************************"
+#IFDEF "EASEModel"
+Symbol "User 34"
+{
+	Represents Node "202" AND_SUBTYPES
+	Assign To "AV-3 High Level Architecture"
+}
+
+#IFDEF "UML Object-oriented"
+	Symbol "573" 
+	{
+	Assign To "SV-01 System Interface Description"
+	Assign To "SV-02 System Resource Description"
+	Assign To "Network Concept"  //Later renamed to "SV-02 System Resource Alternative"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "SV-04 Technical Capability Description"
+	}
+#else
+	Symbol "573" 
+	{
+	Assign To "SV-01 System Interface Description"
+	Assign To "SV-02 System Resource Description"
+	Assign To "Network Concept"  //Later renamed to "SV-02 System Resource Alternative"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "SV-04 Technical Capability Description"
+	}
+#endif
+#endif
+
+Symbol "User 15"
+{
+	REPRESENTS Node "Technology" AND_SUBTYPES
+	Assign To "SV-02 System Resource Description"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "CV-1 Vision"
+}
+
+
+Symbol "User 13"
+{
+	REPRESENTS Node "External System" AND_SUBTYPES
+	Assign To "SV-01 System Interface Description"
+	Assign To "SV-02 System Resource Description"
+	Assign To "SV-04 Technical Capability Description"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "SV-04 Technical Capability Description"
+}
+Symbol "User 20" 
+{
+	REPRESENTS Node "Data Store" AND_SUBTYPES
+	Assign To "SV-04 Technical Capability Description"
+	Assign To "AV-3 High Level Architecture"
+
+}
+Symbol "User 19" 
+{
+	REPRESENTS Node "Technical Capability" AND_SUBTYPES
+	Assign To "SV-04 Technical Capability Description"
+	Assign To "SV-04 Technical Capability Hierarchy"
+	Assign To "AV-3 High Level Architecture"
+}
+
+Symbol "User 32"
+{
+	REPRESENTS Node "System Component" AND_SUBTYPES
+	Assign To "SV-01 System Interface Description"
+	Assign To "SV-02 System Resource Description"
+	Assign To "Network Concept"  //Later renamed to "SV-02 System Resource Alternative"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "SV-04 Technical Capability Description"
+}
+
+Symbol "User 33"
+{
+	REPRESENTS NODE "Product Line" AND_SUBTYPES
+	Assign To "SV-01 System Interface Description"
+	Assign To "SV-02 System Resource Description"
+	Assign To "AV-3 High Level Architecture"
+}
+
+REM "***************************************************************************************************************************************************************"
+REM "Symbol for System - Renamed later"
+REM "Uses the Depiction of 'System' in 'System Context' - using symbol type number so that if the diagram is 'Off' it will still work"
+REM "***************************************************************************************************************************************************************"
+Symbol "User 12"
+{
+	REPRESENTS Node "System" AND_SUBTYPES
+	Assign To "SV-01 System Interface Description"
+	Assign To "SV-02 System Resource Description"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "SV-04 Technical Capability Description"
+}
+
+
+//DIV-1
+Symbol "User 9"
+{
+	Represents Node "Data Concept"
+	DEPICTIONS { DIAGRAM "images\DOCUMENT.wmf" MENU "images\DOCUMENT.bmp"  }
+	Assign To "Div-1 Conceptual Data Model"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "CV-1 Vision"
+}
+
+Symbol "User 10"
+{
+	REPRESENTS IMPLICIT RELATIONSHIP "Data Concept"."Related Data Concepts" AND_SUBTYPES
+	Depict Like "Generic Line"
+	Assign To "Div-1 Conceptual Data Model"
+}
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+REM "Now do Symbol Renames - prevents warning messages because these same names have been used elsewhere"
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+
+Rename Symbol "User 5" To "Communication Connection"
+Rename Symbol "User 8" To "System Interface"
+Rename Symbol "User 9" To "Data Concept"
+Rename Symbol "User 10" To "Relationship"
+Rename Symbol "User 12" to "System"
+Rename Symbol "User 13" to "External System"
+Rename Symbol "User 15" To "Technology"
+//Rename Symbol "User 17" To "Application"
+Rename Symbol "User 18" To "System Data Exchange"
+Rename Symbol "User 19" To "Technical Capability"
+Rename Symbol "User 20" To "Data Store"
+Rename Symbol "User 21" To "Needline"
+Rename Symbol "User 22" To "IER"
+Rename Symbol "User 44" To "ComponentPartOfSystem"
+Rename Symbol "User 45" To "TechCapabiltyPerfBy"
+#IFDEF "EASEModel"
+Rename Symbol "User 34" To "Actor"
+#endif
+//See additional renames below...
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+REM "*************************************************************** Diagrams  *************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+
+Diagram "SV-01 System Interface Description"
+{
+	CHAPTER "Behavior"
+	PROPERTY "Auto-populate implicit relationships" {   EDIT BOOLEAN  DEFAULT "T"    LABEL "Auto-populate implicit relationships" HELP "On adjusting box-in-box arrangements" }
+}
+
+Diagram "SV-02 System Resource Description"
+{
+	CHAPTER "Behavior"
+	PROPERTY "Auto-populate implicit relationships" {   EDIT BOOLEAN  DEFAULT "T"    LABEL "Auto-populate implicit relationships" HELP "On adjusting box-in-box arrangements" }
+}
+Diagram "SV-04 Technical Capability Description"
+{
+	CHAPTER "Behavior"
+	PROPERTY "Auto-populate implicit relationships" {   EDIT BOOLEAN  DEFAULT "T"    LABEL "Auto-populate implicit relationships" HELP "On adjusting box-in-box arrangements" }
+}
+Diagram "OV-5 Operational Activity Tree"
+{
+	Hierarchical
+	CHAPTER "Hierarchical Numbering"
+	PROPERTY "Hierarchical Numbering" { EDIT Boolean LENGTH 1 DEFAULT "F" }
+	PROPERTY "First Node Number" { EDIT Text Length 20 }
+}
+Diagram "SV-04 Technical Capability Hierarchy"
+{
+	Hierarchical
+	CHAPTER "Hierarchical Numbering"
+	PROPERTY "Hierarchical Numbering" { EDIT Boolean LENGTH 1 DEFAULT "F" }
+	PROPERTY "First Node Number" { EDIT Text Length 20 }
+}
+Diagram "CV-1 Vision"
+{
+	CHAPTER "Behavior"
+	PROPERTY "Auto-populate implicit relationships" {   EDIT BOOLEAN  DEFAULT "T"    LABEL "Auto-populate implicit relationships" HELP "On adjusting box-in-box arrangements" }
+}
+Diagram "PV-1 Project Portfolio Relationships"
+{
+	CHAPTER "Behavior"
+	PROPERTY "Auto-populate implicit relationships" {   EDIT BOOLEAN  DEFAULT "T"    LABEL "Auto-populate implicit relationships" HELP "On adjusting box-in-box arrangements" }
+}
+Diagram "AV-3 High Level Architecture"
+{
+	CHAPTER "Behavior"
+	PROPERTY "Auto-populate implicit relationships" {   EDIT BOOLEAN  DEFAULT "T"    LABEL "Auto-populate implicit relationships" HELP "On adjusting box-in-box arrangements" }
+}
+//see rename below
+Symbol "User 29"
+{
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\Yellow Beveled Rectangle.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\Yellow Beveled Rectangle.bmp"  }
+	REPRESENTS NODE "Process / Activity" AND_SUBTYPES
+	Assign To "AV-3 High Level Architecture"
+	Assign To "OV-5 Operational Activity Tree"
+	Assign To "OV-2 Operational Resource Flow Description"
+}
+
+Symbol "User 4"
+{
+	REPRESENTS NODE "Business Function" AND_SUBTYPES
+	Assign To "OV-5 Operational Activity Tree"
+	Assign To "AV-3 High Level Architecture"
+	Assign To "OV-2 Operational Resource Flow Description"
+	Assign To "CV-1 Vision"
+}
+REM "***************************************************************************************************************************************************************"
+REM "Symbol for Node  Added here so it appears first - moved down from SV diagrams"
+REM "Uses the Depiction of a known default graphic"
+REM "***************************************************************************************************************************************************************"
+Symbol "User 2"
+{
+	REPRESENTS NODE "Node" AND_SUBTYPES
+	Assign To "SV-01 System Interface Description"
+	Assign To "SV-02 System Resource Description"
+	Assign To "OV-2 Operational Resource Flow Description"
+	Assign To "AV-3 High Level Architecture"
+	//Depictions {Diagram "images\ExternalNode.wmf" borders { 1, 2, 1, 2 } MENU "images\ExternalNode.bmp"}
+}
+SYMBOL "BusFunctPartOfBusFunct"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS IMPLICIT RELATIONSHIP "Business Function"."Parent Business Function" AND_SUBTYPES
+	REPRESENTS IMPLICIT RELATIONSHIP "Process / Activity"."Parent" AND_SUBTYPES
+	Assign To "OV-5 Operational Activity Tree"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+}
+SYMBOL "ComponentPartOfSystem"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS IMPLICIT RELATIONSHIP "System Component"."System" AND_SUBTYPES
+	Assign To "SV-02 System Resource Description" EMBEDDEDBY
+	Assign To "SV-01 System Interface Description" EMBEDDEDBY
+	Assign To "SV-04 Technical Capability Description" EMBEDDEDBY
+	Assign To "Network Concept" EMBEDDEDBY   // later renamed to "SV-02 System Resource Alternative" EMBEDDEDBY
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+}
+SYMBOL "TechCapabiltyPerfBy"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS IMPLICIT RELATIONSHIP "Technical Capability"."Performed by" AND_SUBTYPES
+	Assign To "SV-04 Technical Capability Description" EMBEDDEDBY
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+}
+
+Diagram "CV-2 Capability Taxonomy"
+{
+	CHAPTER "Hierarchical Numbering"
+	PROPERTY "Hierarchical Numbering" { EDIT Boolean LENGTH 1 DEFAULT "F" }
+	PROPERTY "First Node Number" { EDIT Text Length 20 }
+}
+
+SYMBOL "CapabilityPartOfCapability"
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS IMPLICIT RELATIONSHIP "Capability"."Parent Capability" AND_SUBTYPES
+	Assign To "CV-2 Capability Taxonomy"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+
+}
+Definition "Capability"
+{
+	SUBTYPE Of "VEAR Root"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmCapability.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\dmCapability.bmp"  }
+	PROPERTY "Parent Capability"{  EDIT HETEROGENEOUSONEOF "Capability" AND_SUBTYPES  MIRRORS "Parent Of Capability"  ASGRID  DISPLAY{ FORMAT ListNameOnly LEGEND "Parent Capability" }  }
+	PROPERTY "Parent Of Capability"{  EDIT HETEROGENEOUSLISTOF "Capability" AND_SUBTYPES  MIRRORS "Parent Capability"  ASGRID   DISPLAY{ FORMAT ListNameOnly LEGEND "Parent Of Capability" }  }
+	Chapter "CV-5"
+		Property "Organizations" {Edit ListOf "Organizational Unit" ASGRID FROM_CHOICES_ONLY}
+	Chapter "CV-6"
+		Property "Business Functions" {Edit ListOf "Business Function" ASGRID FROM_CHOICES_ONLY}
+	Chapter "CV-8"
+		Property "Systems" {Edit ListOf "System" ASGRID FROM_CHOICES_ONLY}
+	Chapter "PV-3"
+		Property "Projects" {Edit ListOf "Project" ASGRID}
+}
+
+Symbol "Capability" in "CV-2 Capability Taxonomy"
+{
+	REPRESENTS NODE "Capability" AND_SUBTYPES
+}
+Symbol "User 31"
+{
+	REPRESENTS NODE "Capability" AND_SUBTYPES
+	Assign To "AV-3 High Level Architecture"
+	Assign To "CV-1 Vision"
+}
+Rename Symbol "User 31" To "Capability"
+
+Symbol "User 27" 
+{
+	DEPICT LIKE "Generic Line"
+	REPRESENTS IMPLICIT RELATIONSHIP "Technical Capability"."Parent Capability" AND_SUBTYPES
+	Assign To "SV-04 Technical Capability Hierarchy"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+	PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+}
+
+//Diagram and Symbol for BRM Visual auto-created (via macro) from imported BRM Data
+Diagram "OV-5 VA EA BRM Hierarchy View (MACRO-CREATE-ONLY)"
+{
+	Hierarchical
+}
+Rename Symbol "User 30" To "BRM Item"
+Symbol "BRM Item"
+{
+	Assign To "OV-5 VA EA BRM Hierarchy View (MACRO-CREATE-ONLY)"
+//	Assign To "OV-5 VA EA BRM Container View (MACRO-CREATE-ONLY)"
+	Defined By "Business Function"
+	Depict Like "1154"
+}
+
+//more late renames to prevent errors
+//Rename Symbol "User 23" To ""
+//Rename Symbol "User 24" To ""
+//Rename Symbol "User 25" To ""
+//Rename Symbol "User 26" To ""
+Rename Symbol "User 2" To "Node"
+Rename Symbol "User 27" To "SysFunctionPartOfSysFunction"
+Rename Symbol "User 4" to "Business Function"
+Rename Symbol "User 29" To "Activity"
+Rename Symbol "User 32" To "System Component"
+Rename Symbol "User 33" To "Product Line"
+
+Definition "Architecture Link"
+{
+		CHAPTER "Participants"
+		PROPERTY "From"{  EDIT HETEROGENEOUSONEOF  "VEAR Root" AND_SUBTYPES  ASGRID    FROMDEF  }
+		PROPERTY "To"{  EDIT HETEROGENEOUSONEOF  "VEAR Root" AND_SUBTYPES  ASGRID    TODEF }
+}
+
+Symbol "User 28"
+{
+	Assign To "AV-3 High Level Architecture"
+	Assign To "CV-1 Vision"
+	Assign To "PV-1 Project Portfolio Relationships"
+	Depict Like "55"
+	DEPICTIONS { MENU "images\architecture-link.bmp"  }
+	REPRESENTS EXPLICIT RELATIONSHIP "Architecture Link" 
+}
+Symbol "User 41"
+{
+	Represents Node "Organizational Unit"
+	Assign To "CV-1 Vision"
+	Assign To "PV-1 Project Portfolio Relationships"
+}
+Symbol "User 42"
+{
+	Represents Node "Portfolio"
+	Assign To "CV-1 Vision"
+	Assign To "PV-1 Project Portfolio Relationships"
+}
+Symbol "User 43"
+{
+	Represents Node "Project"
+	Assign To "CV-1 Vision"
+	Assign To "PV-1 Project Portfolio Relationships"
+}
+
+Rename Symbol "User 28" To "Architecture Link"
+Rename Symbol "User 41" To "Organization"
+Rename Symbol "User 42" To "Portfolio"
+Rename Symbol "User 43" To "Project"
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+REM "*************************************************************** Network Concept - SV-2 Alternative*************************************************************"
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+
+	List "Processor Stereotypes"
+	{
+		Value "General Processor"  	depictions {diagram Retain Style images\general_processor.wmf borders { 1, 2, 1, 2 }	menu images\general_processor.bmp}
+		Value "Asic Processor"    	depictions {diagram Retain Style images\asic_processor.wmf	borders { 1, 2, 1, 2 }	menu images\asic_processor.bmp}
+		Value "CDM"  	depictions {diagram Retain Style images\cdm.wmf	borders { 1, 2, 1, 2 } menu images\cdm.bmp}
+		Value "Cluster Controller"    		depictions {diagram Retain Style images\cluster_controller.wmf borders { 1, 2, 1, 2 }		menu images\cluster_controller.bmp}
+		Value "Content Engine"  	depictions {diagram Retain Style images\content_engine.wmf	borders { 1, 2, 1, 2 }	menu images\content_engine.bmp}
+		Value "Content Service Module"    		depictions {diagram Retain Style images\content_service_module.wmf borders { 1, 2, 1, 2 }		menu images\content_service_module.bmp}
+		Value "Content Transformation Engine"  	depictions {diagram Retain Style images\content_transformation_engine.wmf borders { 1, 2, 1, 2 }	menu images\content_transformation_engine.bmp}
+		Value "Front End Processor"  	depictions {diagram Retain Style images\front_end_processor.wmf borders { 1, 2, 1, 2 }		menu images\front_end_processor.bmp}
+		Value "Management Engine" 	depictions {diagram Retain Style images\management_engine.wmf borders { 1, 2, 1, 2 }		menu images\management_engine.bmp}
+		Value "Service Control"  	depictions {diagram Retain Style images\service_control.wmf	borders { 1, 2, 1, 2 }	menu images\service_control.bmp}
+		Value "Switch Processor"  	depictions {diagram Retain Style images\switch_processor.wmf borders { 1, 2, 1, 2 }		menu images\switch_processor.bmp}
+		Value "System Controller"  	depictions {diagram Retain Style images\system_controller.wmf borders { 1, 2, 1, 2 }		menu images\system_controller.bmp}
+		Value "Network Management Appliance"  	depictions {diagram Retain Style images\network_management_appliance.wmf borders { 1, 2, 1, 2 }	menu images\network_management_appliance.bmp}
+			Value "Cisco 4310 End Office System"  	depictions {diagram Retain Style images\cisco_4310_end_office_system.wmf borders { 1, 2, 1, 2 }	menu images\cisco_4310_end_office_system.bmp}
+			Value "Cisco Call Manager"    		depictions {diagram Retain Style images\Cisco_CallManager.wmf borders { 1, 2, 1, 2 }		menu images\Cisco_CallManager.bmp}
+			Value "Cisco VN2900"  	depictions {diagram Retain Style images\cisco_vn2900.wmf borders { 1, 2, 1, 2 }	menu images\cisco_vn2900.bmp}
+			Value "Cisco VN5900"  	depictions {diagram Retain Style images\cisco_vn5900.wmf borders { 1, 2, 1, 2 }		menu images\cisco_vn5900.bmp}
+			Value "Cisco VN5902"    		depictions {diagram Retain Style images\cisco_vn5902.wmf borders { 1, 2, 1, 2 }		menu images\cisco_vn5902.bmp}
+			Value "Cluster Controller 3274"  	depictions {diagram Retain Style images\cluster_controller_3274.wmf borders { 1, 2, 1, 2 }	menu images\cluster_controller_3274.bmp}
+			Value "ICS 7750"    		depictions {diagram Retain Style images\ics_7750.wmf	borders { 1, 2, 1, 2 }	menu images\ics_7750.bmp}
+			Value "Intelligence Engine 2100 Series"  	depictions {diagram Retain Style images\intelligence_engine_2100_series.wmf borders { 1, 2, 1, 2 }	menu images\intelligence_engine_2100_series.bmp}
+			Value "SC2200 Signaling Controller"  	depictions {diagram Retain Style images\SC2200_Signaling_Controller.wmf	borders { 1, 2, 1, 2 }	menu images\SC2200_Signaling_Controller.bmp}
+			Value "ICM"    		depictions {diagram Retain Style images\icm.wmf borders { 1, 2, 1, 2 }	menu images\icm.bmp}
+			Value "IP-TV Broadcast Server"  	depictions {diagram Retain Style images\ip-tv_broadcast_server.wmf borders { 1, 2, 1, 2 }		menu images\ip-tv_broadcast_server.bmp}
+			Value "IP-TV Content Manager" 	depictions {diagram Retain Style images\ip-tv_content_manager.wmf borders { 1, 2, 1, 2 }		menu images\ip-tv_content_manager.bmp}
+			Value "PXF"  	depictions {diagram Retain Style images\PXF.wmf borders { 1, 2, 1, 2 }		menu images\PXF.bmp}
+			Value "Netsonar Security Scanner"  	depictions {diagram Retain Style images\netsonar_security_scanner.wmf borders { 1, 2, 1, 2 }	menu images\netsonar_security_scanner.bmp}
+	}
+
+	List "Communication Medium Stereotypes"
+	{
+		Value "Ethernet Line"    	depictions {diagram Retain Style images\ethernet_line.wmf borders { 1, 2, 1, 2 }	menu images\ethernet_line.bmp}
+		Value "Token Ring"    		depictions {diagram Retain Style images\token_ring.wmf borders { 1, 2, 1, 2 }	menu images\token_ring.bmp}
+		Value "FDDI Ring"    		depictions {diagram Retain Style images\fddi_ring.wmf borders { 1, 2, 1, 2 }		menu images\fddi_ring.bmp}
+		Value "DPT Ring"    		depictions {diagram Retain Style images\dpt_ring.wmf borders { 1, 2, 1, 2 }	menu images\dpt_ring.bmp}
+		Value "Channelized Pipe"	depictions {diagram Retain Style images\channelized_pipe.wmf borders { 1, 2, 1, 2 }		menu images\channelized_pipe.bmp}
+		Value "Concatenated Payload"    depictions {diagram Retain Style images\concatenated_payload.wmf borders { 1, 2, 1, 2 }		menu images\concatenated_payload.bmp}
+		Value "DWDM Network Line"    	depictions {diagram Retain Style images\dwdm_network_line.wmf borders { 1, 2, 1, 2 }		menu images\dwdm_network_line.bmp}
+		Value "DWDM Ring"    		depictions {diagram Retain Style images\dwdm_ring.wmf borders { 1, 2, 1, 2 }	menu images\dwdm_ring.bmp}
+		Value "Network Pipe Vertical"   depictions {diagram Retain Style images\network_pipe_vertical.wmf borders { 1, 2, 1, 2 } menu images\network_pipe_vertical.bmp}
+		Value "Optical Fiber"    	depictions {diagram Retain Style images\optical_fiber.wmf borders { 1, 2, 1, 2 }	menu images\optical_fiber.bmp}
+		Value "Web Cluster"    		depictions {diagram Retain Style images\web_cluster.wmf borders { 1, 2, 1, 2 }	menu images\web_cluster.bmp}
+		Value "BBFW Media"    		depictions {diagram Retain Style images\bbfw_media.wmf borders { 1, 2, 1, 2 } menu images\bbfw_media.bmp}
+	}
+
+	List "Communication Node Stereotypes"
+	{
+		Value "Access Point"    		depictions {diagram Retain Style images\accesspoint.wmf borders { 1, 2, 1, 2 }		menu images\accesspoint.bmp}
+		Value "Analog Telephone Adaptor ATA"    depictions {diagram Retain Style images\analog_telephone_adaptor_ata.wmf	borders { 1, 2, 1, 2 }	menu images\analog_telephone_adaptor_ata.bmp}
+		Value "PBX"    			depictions {diagram Retain Style images\pbx_small.wmf	borders { 1, 2, 1, 2 }		menu images\pbx_small.bmp}
+		Value "Breakout Box"    	depictions {diagram Retain Style images\breakout_box.wmf borders { 1, 2, 1, 2 }	menu images\breakout_box.bmp}
+		Value "Cable Modem"    		depictions {diagram Retain Style images\cable_modem.wmf borders { 1, 2, 1, 2 }	menu images\cable_modem.bmp}
+		Value "Ether Client"    	depictions {diagram Retain Style images\etherclient.wmf borders { 1, 2, 1, 2 }		menu images\etherclient.bmp}
+		Value "IP Standard"    		depictions {diagram Retain Style images\ip_standard.wmf borders { 1, 2, 1, 2 } menu images\ip_standard.bmp}
+		Value "Modem"    		depictions {diagram Retain Style images\modem.wmf borders { 1, 2, 1, 2 }		menu images\modem.bmp}
+		Value "SSL Terminator"    	depictions {diagram Retain Style images\SSL_Terminator.wmf	borders { 1, 2, 1, 2 } menu images\SSL_Terminator.bmp}
+		Value "Truck"    		depictions {diagram Retain Style images\truck.wmf  borders { 1, 2, 1, 2 }	menu images\truck.bmp}
+		Value "WDM"    			depictions {diagram Retain Style images\wdm.wmf	borders { 1, 2, 1, 2 }	menu images\wdm.bmp}
+		Value "Wireless Transport"    	depictions {diagram Retain Style images\wireless_transport.wmf borders { 1, 2, 1, 2 }	menu images\wireless_transport.bmp}
+			Value "H.323"    	depictions {diagram Retain Style images\h_323.wmf borders { 1, 2, 1, 2 }	menu images\h_323.bmp}
+			Value "Modem Cisco"    	depictions {diagram Retain Style images\modem_cisco.wmf borders { 1, 2, 1, 2 }	menu images\modem_cisco.bmp}
+			Value "ONS 15540 Optical Transponder"    	depictions {diagram Retain Style images\ons_15540_optical_transponder.wmf borders { 1, 2, 1, 2 }	menu images\ons_15540_optical_transponder.bmp}
+			Value "BBS Bulletin Board System"    		depictions {diagram Retain Style images\bbs_bulletin_board_system.wmf borders { 1, 2, 1, 2 }		menu images\bbs_bulletin_board_system.bmp}
+			Value "DSU CSU"    		depictions {diagram Retain Style images\dsu_csu.wmf borders { 1, 2, 1, 2 }		menu images\dsu_csu.bmp}
+			Value "Dualmode Accesspoint"    	depictions {diagram Retain Style images\dualmode_accesspoint.wmf borders { 1, 2, 1, 2 }	menu images\dualmode_accesspoint.bmp}
+	}
+
+	List "Router Stereotypes"
+	{
+		Value "Broadband Router"    	depictions {diagram Retain Style images\broadband_router.wmf  borders { 1, 2, 1, 2 }		menu images\broadband_router.bmp}
+		Value "PC with Router Software" depictions {diagram Retain Style images\pc_with_router_based_software.wmf borders { 1, 2, 1, 2 } menu images\pc_with_router_based_software.bmp}
+		Value "Voice Enabled Router"    depictions {diagram Retain Style images\voice_enabled_router.wmf borders { 1, 2, 1, 2 }	menu images\voice_enabled_router.bmp}
+		Value "Wavelength Router"    	depictions {diagram Retain Style images\wavelength_router.wmf borders { 1, 2, 1, 2 }		menu images\wavelength_router.bmp}
+		Value "Content Router"    	depictions {diagram Retain Style images\content_router.wmf	borders { 1, 2, 1, 2 }	menu images\content_router.bmp}
+		Value "IP Telephony Router"    	depictions {diagram Retain Style images\ip_telephony_router.wmf	borders { 1, 2, 1, 2 }	menu images\ip_telephony_router.bmp}
+		Value "Netflow Router"    	depictions {diagram Retain Style images\netflow_router.wmf	borders { 1, 2, 1, 2 }	menu images\netflow_router.bmp}
+		Value "Optical Services Router"	depictions {diagram Retain Style images\optical_services_router.wmf borders { 1, 2, 1, 2 }	menu images\optical_services_router.bmp}
+		Value "PC Router Card"		depictions {diagram Retain Style images\pc_router_card.wmf	borders { 1, 2, 1, 2 }	menu images\pc_router_card.bmp}
+		Value "Router with Switch"    	depictions {diagram Retain Style images\router_with_switch.wmf borders { 1, 2, 1, 2 }		menu images\router_with_switch.bmp}
+		Value "Software Based Router On File Server"    depictions {diagram Retain Style images\software_based_router_onfileserver.wmf borders { 1, 2, 1, 2 }	menu images\software_based_router_onfileserver.bmp}
+		Value "Protocol Translator"    depictions {diagram Retain Style images\protocol_translator.wmf borders { 1, 2, 1, 2 }	menu images\protocol_translator.bmp}
+			Value "BBFW"    		depictions {diagram Retain Style images\bbfw.wmf borders { 1, 2, 1, 2 }			menu images\bbfw.bmp}
+			Value "Cisco 1000"    		depictions {diagram Retain Style images\cisco_1000.wmf borders { 1, 2, 1, 2 }			menu images\cisco_1000.bmp}
+			Value "Cisco 7500"    		depictions {diagram Retain Style images\cisco_7500.wmf borders { 1, 2, 1, 2 }			menu images\cisco_7500.bmp}
+			Value "Cisco 7505"    		depictions {diagram Retain Style images\cisco_7505.wmf borders { 1, 2, 1, 2 }			menu images\cisco_7505.bmp}
+			Value "Cisco 7507"    		depictions {diagram Retain Style images\cisco_7507_router.wmf borders { 1, 2, 1, 2 }		menu images\cisco_7507_router.bmp}
+			Value "Cisco 10700"		depictions {diagram Retain Style images\cisco_10700.wmf borders { 1, 2, 1, 2 }			menu images\cisco_10700.bmp}
+			Value "Cisco Storage Router"    depictions {diagram Retain Style images\cisco_storage_router.wmf borders { 1, 2, 1, 2 }	menu images\cisco_storage_router.bmp}
+			Value "Cisco Utility Express"	depictions {diagram Retain Style images\cisco_utility_express.wmf	 borders { 1, 2, 1, 2 } menu images\cisco_utility_express.bmp}
+			Value "Metro 1500"    		depictions {diagram Retain Style images\metro_1500.wmf borders { 1, 2, 1, 2 }			menu images\metro_1500.bmp}
+			Value "ONS 15104"    		depictions {diagram Retain Style images\ons_15104.wmf	borders { 1, 2, 1, 2 }		menu images\ons_15104.bmp}
+			Value "100 Baset Hub"    	depictions {diagram Retain Style images\100baset_hub.wmf borders { 1, 2, 1, 2 }	menu images\100baset_hub.bmp}
+			Value "Router with TDM"    	depictions {diagram Retain Style images\router_with_tdm.wmf	borders { 1, 2, 1, 2 }	menu images\router_with_tdm.bmp}
+			Value "Small Hub 10 Baset"    	depictions {diagram Retain Style images\small_hub_10baset.wmf borders { 1, 2, 1, 2 }		menu images\small_hub_10baset.bmp}
+			Value "IAD Router"		depictions {diagram Retain Style images\iad_router.wmf  borders { 1, 2, 1, 2 }			menu images\iad_router.bmp}
+			Value "NAT"			depictions {diagram Retain Style images\nat.wmf	borders { 1, 2, 1, 2 }			menu images\nat.bmp}
+			Value "Netranger"		depictions {diagram Retain Style images\netranger.wmf	borders { 1, 2, 1, 2 }		menu images\netranger.bmp}
+			Value "Netranger Network Monitoring Device"    	depictions {diagram Retain Style images\netranger_networkmonitoringdevice.wmf	 borders { 1, 2, 1, 2 } menu images\netranger_networkmonitoringdevice.bmp}
+			Value "PAD"    			depictions {diagram Retain Style images\pad.wmf	borders { 1, 2, 1, 2 }			menu images\pad.bmp}
+	}
+
+	List "Switch Stereotypes"
+	{
+		Value "Access Gateway"    		depictions {diagram Retain Style images\Access_Gateway.wmf	borders { 1, 2, 1, 2 }	menu images\Access_Gateway.bmp}
+		Value "ATM Switch"    			depictions {diagram Retain Style images\atm_switch.wmf borders { 1, 2, 1, 2 }			menu images\atm_switch.bmp}
+		Value "Data Center Switch"    		depictions {diagram Retain Style images\Data_Center_Switch.wmf  borders { 1, 2, 1, 2 }		menu images\Data_Center_Switch.bmp}
+		Value "ATM Fast GB Ether Switch"    	depictions {diagram Retain Style images\atm_fastgb_etherswitch.wmf  borders { 1, 2, 1, 2 }	menu images\atm_fastgb_etherswitch.bmp}
+		Value "Automatic Protection Switch"    	depictions {diagram Retain Style images\automatic_protection_switching.wmf borders { 1, 2, 1, 2 }		menu images\automatic_protection_switching.bmp}
+		Value "Bridge"    		depictions {diagram Retain Style images\bridge.wmf borders { 1, 2, 1, 2 }		menu images\bridge.bmp}
+		Value "Class 4-5 Switch"    		depictions {diagram Retain Style images\class_4_5_switch.wmf borders { 1, 2, 1, 2 }		menu images\class_4_5_switch.bmp}
+		Value "Content Switch"    		depictions {diagram Retain Style images\content_switch.wmf	borders { 1, 2, 1, 2 }	menu images\content_switch.bmp}
+		Value "Data Center Switch Processor"    depictions {diagram Retain Style images\data_center_switch_processor.wmf	borders { 1, 2, 1, 2 }	menu images\data_center_switch_processor.bmp}
+		Value "Distributed Director"		depictions {diagram Retain Style images\distributed_director.wmf borders { 1, 2, 1, 2 }	menu images\distributed_director.bmp}
+		Value "ISDN Switch"    			depictions {diagram Retain Style images\isdn_switch.wmf borders { 1, 2, 1, 2 }			menu images\isdn_switch.bmp}
+		Value "KVM Switch"    			depictions {diagram Retain Style images\kvm_switch.wmf borders { 1, 2, 1, 2 }			menu images\kvm_switch.bmp}
+		Value "Lan2Lan Switch"    		depictions {diagram Retain Style images\lan2lan_switch.wmf	borders { 1, 2, 1, 2 }	menu images\lan2lan_switch.bmp}
+		Value "Layer 2 Remote Switch"    	depictions {diagram Retain Style images\layer_2_remote_switch.wmf	 borders { 1, 2, 1, 2 } menu images\layer_2_remote_switch.bmp}
+		Value "Multi Layer Switch"    		depictions {diagram Retain Style images\multi_layer_switch.wmf borders { 1, 2, 1, 2 }		menu images\multi_layer_switch.bmp}
+		Value "Multi Switch Device"    		depictions {diagram Retain Style images\multi_switch_device.wmf borders { 1, 2, 1, 2 }		menu images\multi_switch_device.bmp}
+		Value "Multi Layer Remote Switch"    	depictions {diagram Retain Style images\multilayer_remote_switch.wmf borders { 1, 2, 1, 2 }	menu images\multilayer_remote_switch.bmp}
+		Value "Optical Cross Connect"    	depictions {diagram Retain Style images\optical_cross_connect.wmf	borders { 1, 2, 1, 2 } menu images\optical_cross_connect.bmp}
+		Value "Optical Transport"    		depictions {diagram Retain Style images\optical_transport.wmf borders { 1, 2, 1, 2 }		menu images\optical_transport.bmp}
+		Value "PBX Switch"    			depictions {diagram Retain Style images\pbx_switch.wmf borders { 1, 2, 1, 2 }	menu images\pbx_switch.bmp}
+		Value "PC Adapter Card"    		depictions {diagram Retain Style images\pc_adapter_card.wmf	borders { 1, 2, 1, 2 }			menu images\pc_adapter_card.bmp}
+		Value "Universal Gateway"    		depictions {diagram Retain Style images\universal_gateway.wmf borders { 1, 2, 1, 2 }				menu images\universal_gateway.bmp}
+		Value "VIP"    				depictions {diagram Retain Style images\VIP.wmf	borders { 1, 2, 1, 2 }					menu images\VIP.bmp}
+		Value "Virtual Layer Switch"    	depictions {diagram Retain Style images\virtual_layer_switch.wmf	borders { 1, 2, 1, 2 }		menu images\virtual_layer_switch.bmp}
+		Value "Voice Enabled ATM Switch"    	depictions {diagram Retain Style images\voice_enabled_atm_switch.wmf borders { 1, 2, 1, 2 }			menu images\voice_enabled_atm_switch.bmp}
+		Value "Workgroup Switch"    		depictions {diagram Retain Style images\workgroup_switch_color.wmf borders { 1, 2, 1, 2 }			menu images\workgroup_switch_color.bmp}
+		Value "Workgroup Switch Voice Enabled"  depictions {diagram Retain Style images\workgroup_switch_voice_enabled.wmf borders { 1, 2, 1, 2 }		menu images\workgroup_switch_voice_enabled.bmp}
+		Value "Lan-to-Lan Switching Software"  depictions {diagram Retain Style images\lan2lan.wmf borders { 1, 2, 1, 2 }		menu images\lan2lan.bmp}
+		Value "Wireless Bridge"    		depictions {diagram Retain Style images\wireless_bridge.wmf	borders { 1, 2, 1, 2 }	menu images\wireless_bridge.bmp}
+			Value "BTS SoftSwitch"    		depictions {diagram Retain Style images\BTS_10200_Softswitch.wmf borders { 1, 2, 1, 2 }	menu images\BTS_10200_Softswitch.bmp}
+			Value "Cisco 5500"    			depictions {diagram Retain Style images\cisco_5500_switch.wmf borders { 1, 2, 1, 2 }		menu images\cisco_5500_switch.bmp}
+			Value "Cisco 6701"    			depictions {diagram Retain Style images\cisco_6701.wmf borders { 1, 2, 1, 2 }			menu images\cisco_6701.bmp}
+			Value "CSS 11000"    			depictions {diagram Retain Style images\css_11000.wmf	borders { 1, 2, 1, 2 }		menu images\css_11000.bmp}
+			Value "MGX 8220"    			depictions {diagram Retain Style images\mgx_8220.wmf	borders { 1, 2, 1, 2 }		menu images\mgx_8220.bmp}
+			Value "MGX 8240"    			depictions {diagram Retain Style images\mgx_8240.wmf	borders { 1, 2, 1, 2 }		menu images\mgx_8240.bmp}
+			Value "MGX 8260"    			depictions {diagram Retain Style images\mgx_8260.wmf	borders { 1, 2, 1, 2 }		menu images\mgx_8260.bmp}
+			Value "VSC3000 Virtual Switch Controller"    	depictions {diagram Retain Style images\vsc3000_virtual_switch_controller.wmf	 borders { 1, 2, 1, 2 } menu images\vsc3000_virtual_switch_controller.bmp}
+			Value "BBSM"    			depictions {diagram Retain Style images\bbsm.wmf borders { 1, 2, 1, 2 }			menu images\bbsm.bmp}
+			Value "Edge Label Switch Router"    	depictions {diagram Retain Style images\edge_label_switch_router.wmf borders { 1, 2, 1, 2 }	menu images\edge_label_switch_router.bmp}
+			Value "Edge Label Switch Router with Netflow"    	depictions {diagram Retain Style images\edge_label_switch_router_with_netflow.wmf borders { 1, 2, 1, 2 }	menu images\edge_label_switch_router_with_netflow.bmp}
+			Value "Generic Softswitch"    		depictions {diagram Retain Style images\generic_softswitch.wmf borders { 1, 2, 1, 2 }		menu images\generic_softswitch.bmp}
+			Value "IntelliSwitch Stack"    		depictions {diagram Retain Style images\intelliswitch_stack.wmf	borders { 1, 2, 1, 2 }	menu images\intelliswitch_stack.bmp}
+			Value "IP DSL Switch"    		depictions {diagram Retain Style images\ip_dsl_switch.wmf	borders { 1, 2, 1, 2 }	menu images\ip_dsl_switch.bmp}
+			Value "ITP"    				depictions {diagram Retain Style images\itp.wmf	borders { 1, 2, 1, 2 }			menu images\itp.bmp}
+			Value "Local Director"    		depictions {diagram Retain Style images\local_director.wmf	borders { 1, 2, 1, 2 }	menu images\local_director.bmp}
+			Value "MAU"    				depictions {diagram Retain Style images\mau.wmf	borders { 1, 2, 1, 2 }	menu images\mau.bmp}
+			Value "Program Switch"    		depictions {diagram Retain Style images\program_switch.wmf	borders { 1, 2, 1, 2 }			menu images\program_switch.bmp}
+			Value "Route Switch Processor with SI"		depictions {diagram Retain Style images\route_switch_processor_with_si.wmf borders { 1, 2, 1, 2 }	menu images\route_switch_processor_with_si.bmp}
+			Value "Route Switch Processor without SI"    	depictions {diagram Retain Style images\route_switch_processor_without_si.wmf	borders { 1, 2, 1, 2 } menu images\route_switch_processor_without_si.bmp}
+			Value "Transpath"    			depictions {diagram Retain Style images\transpath.wmf	borders { 1, 2, 1, 2 }				menu images\transpath.bmp}
+	}
+
+	List "Server Stereotypes"
+	{
+		Value "Access Server"    		depictions {diagram Retain Style images\access_server.wmf	borders { 1, 2, 1, 2 }	menu images\access_server.bmp}
+		Value "File Server "		    	depictions {diagram Retain Style images\file_server.wmf borders { 1, 2, 1, 2 }		menu images\file_server.bmp}
+		Value "Server with PC Router"    	depictions {diagram Retain Style images\server_with_pc_router.wmf borders { 1, 2, 1, 2 }	menu images\server_with_pc_router.bmp}
+		Value "Terminal Server"    		depictions {diagram Retain Style images\terminal_server.wmf	borders { 1, 2, 1, 2 }	menu images\terminal_server.bmp}
+		Value "Voice Enabled Access Server"    	depictions {diagram Retain Style images\voice_enabled_access_server.wmf	borders { 1, 2, 1, 2 }	menu images\voice_enabled_access_server.bmp}
+		Value "Web Server"    			depictions {diagram Retain Style images\web_server.wmf borders { 1, 2, 1, 2 }		menu images\web_server.bmp}
+			Value "Cisco 6705 Access Server"    	depictions {diagram Retain Style images\cisco_6705_access_server.wmf borders { 1, 2, 1, 2 }	menu images\cisco_6705_access_server.bmp}
+			Value "Cisco 6732 Access Server"    	depictions {diagram Retain Style images\cisco_6732_access_server.wmf borders { 1, 2, 1, 2 }	menu images\cisco_6732_access_server.bmp}
+			Value "Cisco Directory Server"    	depictions {diagram Retain Style images\cisco_directory_server.wmf borders { 1, 2, 1, 2 }	menu images\cisco_directory_server.bmp}
+			Value "Microweb Server"    		depictions {diagram Retain Style images\microweb_server.wmf	borders { 1, 2, 1, 2 }	menu images\microweb_server.bmp}
+			Value "SIP Proxy Server"    		depictions {diagram Retain Style images\SIP_Proxy_Server.wmf borders { 1, 2, 1, 2 }		menu images\SIP_Proxy_Server.bmp}
+	}
+
+	List "Computer Stereotypes"
+	{
+		Value "Laptop"    		depictions {diagram Retain Style images\laptop.wmf borders { 1, 2, 1, 2 }	menu images\laptop.bmp}
+		Value "Handheld"		depictions {diagram Retain Style images\handheld.wmf borders { 1, 2, 1, 2 }		menu images\handheld.bmp}
+		Value "PDA"			depictions {diagram Retain Style images\pda.wmf	borders { 1, 2, 1, 2 }	menu images\pda.bmp}
+		Value "Tablet PC"    		depictions {diagram Retain Style images\tablet_pc.wmf	borders { 1, 2, 1, 2 }	menu images\tablet_pc.bmp}
+		Value "Server Machine"    	depictions {diagram Retain Style images\server.wmf borders { 1, 2, 1, 2 }	menu images\server.bmp}
+		Value "Mini or VAX"		depictions {diagram Retain Style images\mini_or_vax.wmf borders { 1, 2, 1, 2 }		menu images\mini_or_vax.bmp}
+		Value "Mainframe"    		depictions {diagram Retain Style images\ibm_mainframe.wmf borders { 1, 2, 1, 2 }	menu images\ibm_mainframe.bmp}
+		Value "Supercomputer"    	depictions {diagram Retain Style images\supercomputer.wmf borders { 1, 2, 1, 2 }	menu images\supercomputer.bmp}
+		Value "Computer Group"    	depictions {diagram Retain Style images\computer_group.wmf borders { 1, 2, 1, 2 }	menu images\computer_group.bmp}
+		Value "Monitor"			depictions {diagram Retain Style images\monitor.wmf borders { 1, 2, 1, 2 }		menu images\monitor.bmp}
+		Value "Flat Monitor"		depictions {diagram Retain Style images\flat_monitor.wmf borders { 1, 2, 1, 2 } 	menu images\flat_monitor.bmp}
+		Value "Terminal"    		depictions {diagram Retain Style images\terminal.wmf borders { 1, 2, 1, 2 }			menu images\terminal.bmp}
+		Value "Computer as Rectangle"	depictions {diagram images\rectangle.wmf borders { 1, 2, 1, 2 }   menu images\pc_as_rectangle.bmp }
+		Value "Host"			depictions {diagram Retain Style images\host.wmf borders { 1, 2, 1, 2 }	menu images\host.bmp}
+		Value "Web Browser"    		depictions {diagram Retain Style images\web_browser.wmf borders { 1, 2, 1, 2 }			menu images\web_browser.bmp}
+		Value "Workgroup Director"	depictions {diagram Retain Style images\workgroup_director.wmf borders { 1, 2, 1, 2 }	menu images\workgroup_director.bmp}
+			Value "Ciscoworks Workstation"		depictions {diagram Retain Style images\ciscoworks_workstation.wmf borders { 1, 2, 1, 2 }	menu images\ciscoworks_workstation.bmp}
+			Value "VSC3000 Host"    	depictions {diagram Retain Style images\vsc3000_host.wmf borders { 1, 2, 1, 2 }	menu images\vsc3000_host.bmp}
+			Value "HP Mini"			depictions {diagram Retain Style images\hp_mini.wmf borders { 1, 2, 1, 2 }		menu images\hp_mini.bmp}
+			Value "IBM Mainframe FEP"	depictions {diagram Retain Style images\ibm_mainframe_fep.wmf borders { 1, 2, 1, 2 }	menu images\ibm_mainframe_fep.bmp}
+			Value "IBM Mini AS400"		depictions {diagram Retain Style images\ibm_mini_as400.wmf borders { 1, 2, 1, 2 }		menu images\ibm_mini_as400.bmp}
+			Value "Mac"			depictions {diagram Retain Style images\mac.wmf	borders { 1, 2, 1, 2 }		menu images\mac.bmp}
+	}
+
+	List "Firewall Stereotypes"
+	{
+		Value "Router with Firewall"    	depictions {diagram Retain Style images\router_with_firewall.wmf borders { 1, 2, 1, 2 }	menu images\router_with_firewall.bmp}
+		Value "Firewall Horizontal"    	depictions {diagram Retain Style images\firewall_horizontal.wmf borders { 1, 2, 1, 2 }			menu images\firewall_horizontal.bmp}
+			Value "Cisco Security Manager"  depictions {diagram Retain Style images\cisco_security_manager.wmf borders { 1, 2, 1, 2 }		menu images\cisco_security_manager.bmp}
+			Value "Pix Firewall"    	depictions {diagram Retain Style images\pix_firewall.wmf borders { 1, 2, 1, 2 }			menu images\pix_firewall.bmp}
+			Value "Car"    			depictions {diagram Retain Style images\car.wmf	borders { 1, 2, 1, 2 }	menu images\car.bmp}
+			Value "Centri Firewall"    	depictions {diagram Retain Style images\centri_firewall.wmf	borders { 1, 2, 1, 2 } menu images\centri_firewall.bmp}
+			Value "Firewall Services Module"    	depictions {diagram Retain Style images\Firewall_Services_Module.wmf borders { 1, 2, 1, 2 }	menu images\Firewall_Services_Module.bmp}
+			Value "IOS Firewall"    		depictions {diagram Retain Style images\ios_firewall.wmf borders { 1, 2, 1, 2 }		menu images\ios_firewall.bmp}
+	}
+
+	List "Phone Stereotypes"
+	{
+		Value "Cell Phone"    		depictions {diagram Retain Style images\cell_phone.wmf borders { 1, 2, 1, 2 }			menu images\cell_phone.bmp}
+		Value "Phone Personal" 		depictions {diagram Retain Style images\phone2.wmf	borders { 1, 2, 1, 2 }		menu images\phone2.bmp}
+		Value "Phone Appliance"    	depictions {diagram Retain Style images\phone_appliance.wmf	borders { 1, 2, 1, 2 }	menu images\phone_appliance.bmp}
+		Value "Phone Full Featured"    	depictions {diagram Retain Style images\phone_feature.wmf	borders { 1, 2, 1, 2 }	menu images\phone_feature.bmp}
+		Value "Phone Polycom"    	depictions {diagram Retain Style images\Phone_Polycom.wmf borders { 1, 2, 1, 2 }		menu images\Phone_Polycom.bmp}
+		Value "Phone Fax"    		depictions {diagram Retain Style images\fax_phone.wmf	borders { 1, 2, 1, 2 }		menu images\fax_phone.bmp}
+		Value "Blackberry"		depictions {diagram Retain Style images\blackberry.wmf borders { 1, 2, 1, 2 }			menu images\blackberry.bmp}
+		Value "Pager"    		depictions {diagram Retain Style images\pager.wmf borders { 1, 2, 1, 2 }			menu images\pager.bmp}
+			Value "IP Phone"    		depictions {diagram Retain Style images\ip_phone.wmf	borders { 1, 2, 1, 2 }		menu images\ip_phone.bmp}
+			Value "Mobile Access Phone"    	depictions {diagram Retain Style images\mobile_access_phone.wmf borders { 1, 2, 1, 2 }		menu images\mobile_access_phone.bmp}
+			Value "Phone Ethernet"		depictions {diagram Retain Style images\phone_ethernet.wmf	borders { 1, 2, 1, 2 }	menu images\phone_ethernet.bmp}
+			Value "Hoot and Holler Phone"   depictions {diagram Retain Style images\hoot_and_holler_phone.wmf borders { 1, 2, 1, 2 }	menu images\hoot_and_holler_phone.bmp}
+	}
+
+	List "Person Stereotypes"
+	{
+		Value "End User Male"  	depictions {diagram Retain Style images\end_user_man.wmf borders { 1, 2, 1, 2 }	menu images\end_user_man.bmp}
+		Value "End User Female"  	depictions {diagram Retain Style images\end_user_woman.wmf borders { 1, 2, 1, 2 }	menu images\end_user_woman.bmp}
+		Value "Man"  	depictions {diagram Retain Style images\man.wmf	borders { 1, 2, 1, 2 } menu images\man.bmp}
+		Value "Woman"  	depictions {diagram Retain Style images\woman.wmf borders { 1, 2, 1, 2 }	menu images\woman.bmp}
+		Value "Running Man"  	depictions {diagram Retain Style images\running_man.wmf borders { 1, 2, 1, 2 }	menu images\running_man.bmp}
+		Value "Running Woman"  	depictions {diagram Retain Style images\running_woman.wmf borders { 1, 2, 1, 2 }	menu images\running_woman.bmp}
+		Value "Symbol Man"  	depictions {diagram Retain Style images\symbol_man.wmf borders { 1, 2, 1, 2 }	menu images\symbol_man.bmp}
+		Value "Symbol Woman"  	depictions {diagram Retain Style images\symbol_woman.wmf borders { 1, 2, 1, 2 }	menu images\symbol_woman.bmp}
+	}
+
+
+	List "Location Stereotypes"
+	{
+		Value "Organization"		depictions { diagram Retain Style images\Org_Unit.wmf borders { 1, 2, 1, 2 }	menu images\Org_Unit.bmp }
+		Value "Branch Office"   depictions {diagram Retain Style images\branch_office.wmf borders { 1, 2, 1, 2 }	menu images\branch_office.bmp}
+		Value "Building"  	depictions {diagram Retain Style images\building.wmf borders { 1, 2, 1, 2 }	menu images\building.bmp}
+		Value "Government"  	depictions {diagram Retain Style images\government.wmf borders { 1, 2, 1, 2 }	menu images\government.bmp}
+		Value "Headquarters"  	depictions {diagram Retain Style images\headquarters.wmf borders { 1, 2, 1, 2 }	menu images\headquarters.bmp}
+		Value "Home Office"  	depictions {diagram Retain Style images\home_office.wmf borders { 1, 2, 1, 2 }	menu images\home_office.bmp}
+		Value "House"  		depictions {diagram Retain Style images\house.wmf borders { 1, 2, 1, 2 }	menu images\house.bmp}
+		Value "MDU"  		depictions {diagram Retain Style images\mdu.wmf	borders { 1, 2, 1, 2 } menu images\mdu.bmp}
+		Value "Small Business"  	depictions {diagram Retain Style images\small_business.wmf	borders { 1, 2, 1, 2 } menu images\small_business.bmp}
+		Value "Telecommuter House"  	depictions {diagram Retain Style images\telecommuter_house.wmf borders { 1, 2, 1, 2 }	menu images\telecommuter_house.bmp}
+		Value "University"  	depictions {diagram Retain Style images\university.wmf borders { 1, 2, 1, 2 }	menu images\university.bmp}
+	}
+
+	List "Multiplexer Stereotypes"
+	{
+		Value "Digital Cross Connect"  	depictions {diagram Retain Style images\digital_cross-connect.wmf	 borders { 1, 2, 1, 2 } menu images\digital_cross-connect.bmp}
+		Value "Sonet Mux"  	depictions {diagram Retain Style images\sonet_mux.wmf	borders { 1, 2, 1, 2 } menu images\sonet_mux.bmp}
+			Value "Cisco 6920 Ratemux"  	depictions {diagram Retain Style images\cisco_6920_ratemux.wmf borders { 1, 2, 1, 2 }	menu images\cisco_6920_ratemux.bmp}
+			Value "Cisco 15200"  	depictions {diagram Retain Style images\cisco_15200.wmf borders { 1, 2, 1, 2 }		menu images\cisco_15200.bmp}
+			Value "Cisco 15800"  	depictions {diagram Retain Style images\Cisco_15800.wmf	borders { 1, 2, 1, 2 }	menu images\Cisco_15800.bmp}
+			Value "Mux Cisco"  	depictions {diagram Retain Style images\mux.wmf	 borders { 1, 2, 1, 2 } menu images\mux.bmp}
+			Value "ADM"   depictions {diagram Retain Style images\adm.wmf borders { 1, 2, 1, 2 }	menu images\adm.bmp}
+			Value "DSLAM"  		depictions {diagram Retain Style images\dslam.wmf borders { 1, 2, 1, 2 }	menu images\dslam.bmp}
+	}
+
+	List "Printer Stereotypes"
+	{
+		Value "Printer Industrial"  	depictions {diagram Retain Style images\printer2.wmf	borders { 1, 2, 1, 2 } menu images\printer2.bmp}
+		Value "Plotter"  	depictions {diagram Retain Style images\plotter.wmf	borders { 1, 2, 1, 2 }	menu images\plotter.bmp}
+			Value "Printer Cisco"  	depictions {diagram Retain Style images\printer_cisco.wmf	borders { 1, 2, 1, 2 }	menu images\printer_cisco.bmp}
+	}
+
+	List "Hub Stereotypes"
+	{
+		Value "100 Baset Hub"   depictions {diagram Retain Style images\100baset_hub.wmf borders { 1, 2, 1, 2 }	menu images\100baset_hub.bmp}
+		Value "VPN Concentrator"  	depictions {diagram Retain Style images\vpn_concentrator.wmf borders { 1, 2, 1, 2 }		menu images\vpn_concentrator.bmp}
+			Value "Cisco Hub"  	depictions {diagram Retain Style images\cisco_hub.wmf	borders { 1, 2, 1, 2 }	menu images\cisco_hub.bmp}
+			Value "Cisco Hub Type 2"   depictions {diagram Retain Style images\hub_cisco.wmf borders { 1, 2, 1, 2 }	menu images\hub_cisco.bmp}
+			Value "UBR 910 Cable DSU"  	depictions {diagram Retain Style images\ubr910_cable_dsu.wmf borders { 1, 2, 1, 2 }		menu images\ubr910_cable_dsu.bmp}
+			Value "CDDI FDDI Concentrator"  	depictions {diagram Retain Style images\cddi_fddi_concentrator.wmf borders { 1, 2, 1, 2 }	menu images\cddi_fddi_concentrator.bmp}
+			Value "IP Transport Concentrator"  	depictions {diagram Retain Style images\ip_transport_concentrator.wmf borders { 1, 2, 1, 2 } menu images\ip_transport_concentrator.bmp}
+			Value "Small Hub 10 Baset"  	depictions {diagram Retain Style images\small_hub_10baset.wmf borders { 1, 2, 1, 2 }		menu images\small_hub_10baset.bmp}
+	}
+
+
+	List "Peripheral Stereotypes"
+	{
+		Value "Camera PC Video"   depictions {diagram Retain Style images\camera_pc_video.wmf borders { 1, 2, 1, 2 }	menu images\camera_pc_video.bmp}
+		Value "Dish"  	depictions {diagram Retain Style images\dish.wmf borders { 1, 2, 1, 2 }	menu images\dish.bmp}
+		Value "Fax"  	depictions {diagram Retain Style images\fax.wmf	borders { 1, 2, 1, 2 }	menu images\fax.bmp}
+		Value "Headphones"  	depictions {diagram Retain Style images\headphones.wmf borders { 1, 2, 1, 2 }		menu images\headphones.bmp}
+		Value "Microphone"   depictions {diagram Retain Style images\microphone.wmf borders { 1, 2, 1, 2 }	menu images\microphone.bmp}
+		Value "Optical Amplifier"   depictions {diagram Retain Style images\optical_amplifier.wmf	 borders { 1, 2, 1, 2 } menu images\optical_amplifier.bmp}
+		Value "Projector"  	depictions {diagram Retain Style images\projector.wmf	borders { 1, 2, 1, 2 } menu images\projector.bmp}
+		Value "Repeater"   depictions {diagram Retain Style images\repeater.wmf	borders { 1, 2, 1, 2 }	menu images\repeater.bmp}
+		Value "Satellite"  	depictions {diagram Retain Style images\satellite.wmf	borders { 1, 2, 1, 2 }	menu images\satellite.bmp}
+		Value "Satellite Dish"  	depictions {diagram Retain Style images\satellite_dish.wmf	borders { 1, 2, 1, 2 }	menu images\satellite_dish.bmp}
+		Value "Set Top Box"  	depictions {diagram Retain Style images\set_top_box_stb.wmf	borders { 1, 2, 1, 2 }	menu images\set_top_box_stb.bmp}
+		Value "Scanner"  	depictions {diagram Retain Style images\scanner.wmf borders { 1, 2, 1, 2 }	menu images\scanner.bmp}
+		Value "Speaker"  	depictions {diagram Retain Style images\speaker.wmf	borders { 1, 2, 1, 2 }	menu images\speaker.bmp}
+		Value "Television"  	depictions {diagram Retain Style images\television.wmf borders { 1, 2, 1, 2 }		menu images\television.bmp}
+		Value "Tower"  	depictions {diagram Retain Style images\tower.wmf borders { 1, 2, 1, 2 }		menu images\tower.bmp}
+		Value "UPS RPS"   depictions {diagram Retain Style images\ups_rps.wmf	borders { 1, 2, 1, 2 } menu images\ups_rps.bmp}
+			Value "Satellite Cisco"  	depictions {diagram Retain Style images\satellite_cisco.wmf	borders { 1, 2, 1, 2 }	menu images\satellite_cisco.bmp}
+			Value "Scanner Cisco"  	depictions {diagram Retain Style images\scanner_cisco.wmf borders { 1, 2, 1, 2 }		menu images\scanner_cisco.bmp}
+	}
+
+
+	List "Storage Device Stereotypes"
+	{
+		Value "CDROM External"   depictions {diagram Retain Style images\cdrom_external.wmf	 borders { 1, 2, 1, 2 } menu images\cdrom_external.bmp}
+		Value "FC Storage"  	depictions {diagram Retain Style images\fc_storage.wmf borders { 1, 2, 1, 2 }		menu images\fc_storage.bmp}
+		Value "Storage Solution Engine"  	depictions {diagram Retain Style images\storage_solution_engine.wmf borders { 1, 2, 1, 2 } menu images\storage_solution_engine.bmp}
+
+	}
+
+
+
+	List "Processor Types"
+	{
+		Value "Pentium"
+		Value "Pentium III"
+		Value "Pentium M"
+		Value "Pentium 4-M"
+		Value "Pentium III-M"
+		Value "Celeron"
+		Value "AMD"
+		Value "Athlon"
+	}
+
+	List "Node Stereotypes"
+	{
+		Value "Firewall"    	depictions {diagram images\firewall.wmf	borders { 1, 2, 1, 2 }	menu images\firewall.bmp}
+		Value "Cell_Phone"  	depictions {diagram images\cell_phone.wmf borders { 1, 2, 1, 2 }	menu images\cell_phone.bmp}
+		Value "Database"  	depictions {diagram images\data.wmf	borders { 1, 2, 1, 2 }	menu images\data.bmp}
+		Value "Hub"   		depictions {diagram images\hub.wmf	borders { 1, 2, 1, 2 }	menu images\hub.bmp}
+		Value "Modem"	  	depictions {diagram images\modem.wmf borders { 1, 2, 1, 2 }		menu images\modem.bmp}
+		Value "Multiplexer"  	depictions {diagram images\multiplexer.wmf borders { 1, 2, 1, 2 }	menu images\multiplexer.bmp}
+		Value "PDA"  		depictions {diagram images\pda.wmf	borders { 1, 2, 1, 2 }	menu images\pda.bmp}
+		Value "Printer"   	depictions {diagram images\printer.wmf borders { 1, 2, 1, 2 }		menu images\printer.bmp}
+		Value "Projector" 	depictions {diagram images\projector.wmf borders { 1, 2, 1, 2 }	menu images\projector.bmp}
+		Value "Radio Tower" 	depictions {diagram images\radio_tower.wmf borders { 1, 2, 1, 2 }	menu images\radio_tower.bmp}
+		Value "Router"	  	depictions {diagram images\router.wmf borders { 1, 2, 1, 2 }		menu images\router.bmp}
+		Value "Satellite"	depictions {diagram images\satellite.wmf	borders { 1, 2, 1, 2 } menu images\satellite.bmp}
+		Value "Satellite Dish"  depictions {diagram images\dish.wmf	borders { 1, 2, 1, 2 }	menu images\dish.bmp}
+		Value "Scanner"	  	depictions {diagram images\scanner.wmf borders { 1, 2, 1, 2 }		menu images\scanner.bmp}
+		Value "Server"	  	depictions {diagram images\server.wmf borders { 1, 2, 1, 2 }		menu images\server.bmp}
+		Value "Tablet_PC"     	depictions {diagram images\tablet_pc.wmf borders { 1, 2, 1, 2 }	menu images\tablet_pc.bmp}
+		Value "Terminal" 	depictions {diagram images\terminal.wmf	borders { 1, 2, 1, 2 }	menu images\terminal.bmp}
+
+	}
+	List "Org Types"
+	{
+		Value "Conceptual"
+		Value "Logical"
+		Value "Physical"
+	}
+	
+	Diagram "Network Concept"
+	{
+		LAYOUT { ALIGN OVER }
+		PROPERTY "Chart Type" { EDIT Text LISTONLY List "Org Types" Default "Conceptual" LENGTH 20 UNORDERED }
+	}
+#IFNDEF "Business Enterprise"
+	Rename SYMBOL "Object" in "Network Concept" To "Cloud"
+
+	SYMBOL "Processor" in "Network Concept"
+	{
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Processor Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Communication Node" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\modem.wmf borders { 1, 2, 1, 2 } menu images\modem.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Communication Node Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Router" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\router.wmf borders { 1, 2, 1, 2 } menu images\router.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Router Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Switch" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\switch.wmf borders { 1, 2, 1, 2 } menu images\switch.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Switch Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Server" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\server.wmf borders { 1, 2, 1, 2 } menu images\server.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Server Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Computer" in "Network Concept"
+	{
+		DEPICTIONS {diagram Retain Style images\pc.wmf borders { 1, 2, 1, 2 } menu images\pc.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Computer Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Firewall" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\firewall.wmf borders { 1, 2, 1, 2 }	menu images\firewall.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Firewall Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Phone" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\phone.wmf borders { 1, 2, 1, 2 } menu images\phone.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Phone Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Person" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\androgynous_person.wmf borders { 1, 2, 1, 2 } menu images\androgynous_person.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Person Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Location" in "Network Concept"
+	{
+		depictions {menu images\rectangle.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Location Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Multiplexer" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\multiplexer.wmf borders { 1, 2, 1, 2 } menu images\multiplexer.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Multiplexer Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Printer" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\printer.wmf borders { 1, 2, 1, 2 }	menu images\printer.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Printer Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Hub" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\Hub.wmf borders { 1, 2, 1, 2 }	menu images\Hub.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Hub Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Peripheral" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\peripheral.wmf borders { 1, 2, 1, 2 } menu images\peripheral.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Peripheral Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Storage Device" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\data.wmf borders { 1, 2, 1, 2 } menu images\data.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Storage Device Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	SYMBOL "Communication Medium" in "Network Concept"
+	{
+		depictions {diagram Retain Style images\network_pipe.wmf borders { 1, 2, 1, 2 } menu images\network_pipe.bmp}
+		PROPERTY "Stereotype" { INVISIBLE EDIT Text ListOnly List "Communication Medium Stereotypes" DEFAULT "" LENGTH 32}
+	}
+	DEFINITION "Communication Node"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Communication Node Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Router"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Router Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Switch"
+	{
+		PROPERTY "Stereotype" { EDIT Text LISTONLY LIST "Switch Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Server"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Server Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Computer"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Computer Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Firewall"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Firewall Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Phone"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Phone Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Multiplexer"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Multiplexer Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Printer"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Printer Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Hub"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Hub Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Peripheral"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Peripheral Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Storage Device"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Storage Device Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+	DEFINITION "Communication Medium"
+	{
+		PROPERTY "Stereotype" { EDIT Text LIST "Communication Medium Stereotypes" INIT_FROM_SYMBOL Default "" LENGTH 32  }
+	}
+#ENDIF
+Rename Diagram "Network Concept" To "SV-02 System Resource Alternative"
+Symbol "External System" in "SV-01 System Interface Description"
+{
+	Assign To "SV-02 System Resource Alternative"
+}
+Symbol "System" in "SV-01 System Interface Description"
+{
+	Assign To "SV-02 System Resource Alternative"
+	Assign To "CV-1 Vision"
+}
+Symbol "Node" in "SV-01 System Interface Description"
+{
+	Assign To "SV-02 System Resource Alternative"
+}
+Symbol "System Component" in "SV-01 System Interface Description"
+{
+	Assign To "SV-02 System Resource Alternative"
+}
+SYMBOL "User 14"
+{
+	Represents Node "Communication Node"
+#IFNDEF "Business Enterprise"
+	Depict Like "Cloud" in "SV-02 System Resource Alternative"
+#ELSE
+	Depict Like "Network Cloud" in "SV-02 System Resource Alternative"
+#ENDIF
+	Assign To "SV-02 System Resource Description"
+}
+Rename Symbol "User 14" To "Communications Node"
+Rename Symbol "User 16" To "SysServPartOfNode"
+	SYMBOL "SysServPartOfNode"
+	{
+		DEPICT LIKE "Generic Line"
+		REPRESENTS IMPLICIT RELATIONSHIP "System"."PartOfNodes" AND_SUBTYPES 
+		REPRESENTS IMPLICIT RELATIONSHIP "System"."Product Line" AND_SUBTYPES
+		Assign To "SV-02 System Resource Description" EMBEDDEDBY
+		Assign To "SV-01 System Interface Description" EMBEDDEDBY
+		Assign To "SV-02 System Resource Alternative" EMBEDDEDBY
+		DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+		PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+		PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
+	}
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+Definition "System Component"
+{	
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\exp_application_component.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\exp_application_component.bmp"  }
+	Subtype Of "VA IT ASSET"
+
+	Chapter "Introduction"
+	{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Description" {Zoomable Edit Text Lines 5}
+	Group "Required"
+	{
+	Property "System Component Type" {Edit Text ListOnly List "System Component Type" UNORDERED REQUIRED Help "System Component Type must be supplied" DISPLAY {FORMAT STRING LEGEND "System Component Type"}}
+	Property "System" {Edit ONEOF "System" RELATE BY "is part of" REQUIRED Help "System must be supplied" FROM_CHOICES_ONLY DISPLAY {FORMAT STRING LEGEND "System"}}
+	}
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "Full Name" {Edit Text Length 250 READONLY Help "READ-ONLY Full length name from VEAR" DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	Control "Component Description" {REFPROP "Description" READONLY}
+	Group ""
+	{
+	Control "System" {REFPROP "System" READONLY}
+	Control "System Component Type" {REFPROP "System Component Type" READONLY }
+	}
+	Property "Component ID" {Edit Text Length 100 INVISIBLE READONLY}
+	Property "Component Acronym" {Edit Text Length 100 READONLY DISPLAY {FORMAT STRING LEGEND "$$NONE$$"}}
+	Property "URL" {Edit Text Length 2000 READONLY}
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY Link to VEAR for more info."}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+
+Definition "Component"
+{
+#IFDEF "EASEModel"
+	Subtype Of "VA IT ASSET"
+	Chapter "EASE Properties"
+		Property "Component Type" {Edit Text ListOnly List "Component Type" UNORDERED Default "Unspecified" DISPLAY {FORMAT STRING LEGEND "Component Type"}}
+		Property "Realized Capabilities" {Edit ListOf "Technical Capability" DISPLAY{ FORMAT ListNameOnly LEGEND "Capabilities"} }
+		Property "Depends on Component(s)" {Edit ListOf "Component"}
+		Property "Possible Solutions" {Edit ListOf "System" FROM_CHOICES_ONLY}
+#ENDIF
+}
+
+REM "***************************************************************************************************************************************************************"
+REM "*******************************************************************        DGC Modifications       ************************************************************"
+REM "***************************************************************************************************************************************************************"
+
+List "DGC Code"
+{
+	Value "High"
+	Value "Medium"
+	Value "Low"
+}
+
+List "DGC Domain Value Type"
+{
+	Value "User Defined"
+	Value "Min Max"
+	Value "Valid Value"
+}
+
+List "DGC Open Data Indicator"
+{
+	Value "Public"
+	Value "Restricted"
+	Value "Confidential"
+}
+
+List "DGC Schedule"
+{
+	Value "1qtr"
+	Value "2qtr"
+	Value "3qtr"
+	Value "4qtr"
+}
+
+List "DGC Scope"
+{
+	Value "COMMON"
+	Value "SHARED"
+	Value "ORG SPECIFIC"
+}
+
+List "DGC Status"
+{
+	Value "Draft"
+	Value "Submitted for Approval"
+	Value "Approved"
+	Value "Future Consideration"
+	Value "Under Development"
+}
+
+List "DGC YorN"
+{
+	Value "Y"
+	Value "N"
+}
+
+
+REM "These customizations were made per the request of the data domain team beginning the week of 8-28-17"
+REM "These customizations are to enable the import of the data contained in the DGC load sheets as provided"
+
+Definition "Project Data Model"
+{	Chapter "DGC Properties"
+	LAYOUT { ALIGN OVER Cols 2}
+	Property "Bus Data Steward Name" {Edit Text Length 250}
+	Property "Bus Data Steward Office" {Edit OneOf "Organizational Unit" FROM_CHOICES_ONLY}
+	Property "Bus Data Steward Email" {Edit Text Length 250}
+	Property "Bus Data Steward Phone" {Edit Text Length 50}
+	Property "DGC Approval Date" {Edit Text Length 50}
+	Property "DGC Status" {Edit Text ListOnly List "DGC Status"}
+}
+
+Definition "Entity"
+{
+	SUBTYPE OF "VA Information Asset"
+	Property "Source Table" {INVISIBLE}
+	Chapter "DGC Properties"
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "Bus Data Steward Name" {Edit Text Length 250}
+	Property "Bus Data Steward Office" {Edit OneOf "Organizational Unit" FROM_CHOICES_ONLY}
+	Property "Bus Data Steward Phone" {Edit Text Length 50}
+	Property "Tech Data Steward Name" {Edit Text Length 250}
+	Property "Tech Data Steward Office" {Edit OneOf "Organizational Unit" FROM_CHOICES_ONLY}
+	Property "Tech Data Steward Phone" {Edit Text Length 50}
+	Property "Data Purview" {Edit Text ListOnly List "DGC Scope"}
+	Property "Availability" {Edit Text ListOnly List "DGC Code"}
+	Property "Confidentiality" {Edit Text ListOnly List "DGC Code"}
+	Property "Integrity" {Edit Text ListOnly List "DGC Code"}
+	Property "Information Class System Source" {Edit Text Length 250}
+	Property "Source Table Name" {Edit Text Length 80}
+}
+//made this to be sure that it is possible to link classes to business functions if that requirement occurs
+Definition "Class"
+{
+SUBTYPE OF "VA Information Asset"
+}
+
+DEFINITION "Attribute"
+{
+	Property "Source Column" {INVISIBLE}
+	Property "Source Data Structure" {INVISIBLE}
+	PROPERTY "Database Comment" {Edit Text Length 1200}
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE READONLY Help " READONLY - The ID from VEAR for this item."}
+	Property "Class Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READONLY - The Class ID from VEAR for this item"}
+	Chapter "DGC Properties"
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "Attribute Data Source" {Edit Text Length 250}
+	Property "PHI" {Edit Text ListOnly List "DGC YorN"}
+	Property "PII" {Edit Text ListOnly List "DGC YorN"}
+	Property "PCI" {Edit Text ListOnly List "DGC YorN"}
+	Property "Open Data Indicator" {Edit Text ListOnly List "DGC Open Data Indicator"}
+	Property "Open Data Release Schedule" {Edit Text ListOnly List "DGC Schedule"}
+	Property "Open Data Last Published Date" {Edit Date}
+	Control "UPD Comment" { REFPROP "Database Comment" }
+	Property "Edit Mask" {Edit Text Length 250}
+	Property "Source Column Name" {Edit Text Length 250}
+	Property "XML Tag Name" {Edit Text Length 80}
+	Property "Unit of Measure" {Edit Text Length 80}
+	Property "Precision" {Edit Text Length 80}
+}
+
+Definition "Data Element"
+{
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE READONLY Help " READONLY - The ID from VEAR for this item."}
+	Property "Class Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READONLY - The Class ID from VEAR for this item"}
+	Chapter "DGC Properties"
+	Property "Type Description" {Edit Text Length 1000}
+	Property "Type Source" {Edit Text Length 80}
+	Chapter "Permitted Values"
+	Property "Permitted Values" {Edit ListOf "Permitted Value"}
+}
+
+Definition "Permitted Value"
+{
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE READONLY Help " READONLY - The ID from VEAR for this item."}
+	Property "Class Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READONLY - The Class ID from VEAR for this item"}
+	Chapter "DGC Properties"
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "Value Type Code" {Edit Text ListOnly List "DGC Domain Value Type"}
+	Property "Value List" {Edit COMPLETE ListOf "Value List Member" Keyed By {"Permitted Value":Name, Name} }
+}
+
+Definition "Value List Member"
+{
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE READONLY Help " READONLY - The ID from VEAR for this item."}
+	Property "Class Id" {Edit Numeric Length 50 INVISIBLE READONLY Help "READONLY - The Class ID from VEAR for this item"}
+	Property "Permitted Value" {Key Edit OneOf "Permitted Value"}
+}
+#IFDEF "EASEModel"
+Definition "202"  //Actor
+{
+	SUBTYPE OF "VEAR Root"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\slctact.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\slctact.bmp"  }
+}
+Definition "Person"
+{
+	SUBTYPE OF "Actor"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\usertask.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\usertask.bmp"  }
+}
+Definition "Role"
+{
+	SUBTYPE OF "Actor"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\exp_actor.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\exp_actor.bmp"  }
+}
+Definition "Stakeholder"
+{
+	SUBTYPE OF "Actor"
+	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmPersonnel.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\dmPersonnel.bmp"  }
+}
+#endif
+
+REM "***************************************************************************************************************************************************************"
+REM "*************************************************************************VISTA Structure***********************************************************************"
+Definition "VistA Package"
+{
+	SUBTYPE OF "VEAR Root"
+	Chapter "Introduction"
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	PROPERTY "Description"	{ ZOOMABLE EDIT Text LENGTH 4000 LINES 5 READONLY HELP "READ-ONLY"}
+	Property "Metadata ID" {Edit Text Length 100 READONLY HELP "READ-ONLY" }
+	Property "Prefix" {Edit Text Length 500 Lines 2 READONLY HELP "READ-ONLY"}
+	Property "Additional Prefixes" {Edit Text Length 4000 Lines 2 READONLY HELP "READ-ONLY" }
+	Property "Lowest File Number" {Edit Text Length 500 Lines 2 READONLY HELP "READ-ONLY"}
+	Property "Highest File Number" {Edit Text Length 500 Lines 2 READONLY HELP "READ-ONLY"}
+	Property "Excluded Name Spaces" {Edit Text Length 4000 Lines 2 READONLY HELP "READ-ONLY"}
+	Property "Current Version" {Edit Text Length 50 Lines 2 READONLY HELP "READ-ONLY"}
+	Chapter "VEAR Relationships"
+	Property "Data Store" {Edit OneOf "Data Store" READONLY HELP "READ-ONLY"}
+	
+	Chapter "VEAR Information"
+	{ TESTPROC TestPropertyNotValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
+	Property "VEAR Link" {Edit URLS READONLY HELP "READ-ONLY"}
+	Property "Deleted in VEAR?" {Edit Boolean Default "F" READONLY Help "READ-ONLY Indicator this item was deleted in VEAR if relevant."}
+}
+REM "***************************************************************************************************************************************************************"
+REM "*********************************************************************FEAF Map Structure************************************************************************"
+#ifdef "IncludeFEAFMap"
+Definition "FEAF2 DRM Topic - Data Store"
+{
+	Property "Element Id" {Edit Numeric Length 50 INVISIBLE}
+	Chapter "Introduction"
+	LAYOUT { ALIGN OVER TAB COLUMNS 2 }
+	Property "FEAF2 DRM Topic" {key Edit OneOf "FEAF2 DRM Topic"}
+	Property "Data Store" {key Edit OneOf "Data Store"}
+	Property "Mapping Type" {Edit Text ListOnly List "Federation Mapping Type"}
+}
+#endif
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************                                        TIMELINE Diagrams							********************"
+REM "***************************************************************************************************************************************************************"
+	Rename Diagram "User 14" To "CV-3/CV-4 Capability Phasing and Dependency" 
+	Rename Diagram "User 13" To "SV-08 System Evolution Description"
+	Rename Diagram "User 15" To "PV-2 Project Timeline"
+	RENAME DEFINITION "User 43" TO "Roadmap Event"
+	RENAME DEFINITION "User 44" TO "Roadmap Dependency"
+	RENAME DEFINITION "User 45" TO "Roadmap Group"
+	Rename Symbol "User 35" To "IT Asset"
+	Rename Symbol "User 36" To "Capability Timeline"
+	Rename Symbol "User 37" To "Project Timeline"
+	RENAME SYMBOL "User 38" TO "Roadmap Event"
+	RENAME SYMBOL "User 39" TO "Roadmap Dependency"
+	RENAME SYMBOL "User 40" TO "Roadmap Group"
+
+	list "Colors"	// These colors are in addition to the color list defined in core.cfg.  Color values obtained from http://www.rapidtables.com/web/color/RGB_Color.htm
+	{
+		VALUE "Teal"				Depictions {fill color {0,128,128}}
+		VALUE "Blue"				Depictions {fill color {0,0,255}}
+		VALUE "Maroon"				Depictions {fill color {128,0,0}}
+		VALUE "Lime"				Depictions {fill color {128,0,0}}
+		VALUE "Purple"				Depictions {fill color {128,0,128}}
+		VALUE "Turquoise"			Depictions {fill color {64,224,208}}
+		VALUE "Sienna"				Depictions {fill color {160,82,45}}
+		VALUE "Navy"				Depictions {fill color {0,0,128}}
+		VALUE "Magenta"				Depictions {fill color {255,0,255}}
+		VALUE "Dodger Blue"			Depictions {fill color {30,144,255}}
+		VALUE "Wheat"				Depictions {fill color {245,222,179}}
+		VALUE "Rosy Brown"			Depictions {fill color {188,143,143}}
+	}
+
+	List "Roadmap Event List"
+	{
+		Value "No Outstanding Issues"		Depictions {Segment Color {0,255,0}}
+		Value "Manageable Issues"		Depictions {Segment Color {255,255,0}}
+		Value "Critical Issues"			Depictions {Segment Color {255,0,0}}
+		Value "Not this type"			Depictions {Segment Color {225,225,225}}
+		Value "Completed"			Depictions {Segment Color {0,0,0}}
+	}
+
+
+	DIAGRAM "CV-3/CV-4 Capability Phasing and Dependency"
+	{
+		CHAPTER "Introduction"
+		PROPERTY "IsRoadmapDiagram" { edit text readonly default "T" INVISIBLE }
+		PROPERTY "Description" { edit text }
+		PROPERTY "Sym Type for Project" {EDIT NUMERIC  READONLY DEFAULT "626" INVISIBLE }  // Roadmap Item
+		PROPERTY "Sym Type for Milestone" {EDIT NUMERIC  READONLY DEFAULT "628" INVISIBLE }  // Roadmap Event
+		PROPERTY "Sym Type for Dependency" {EDIT NUMERIC  READONLY DEFAULT "629" INVISIBLE }  // Roadmap Dependency
+		PROPERTY "PrjMilestonesRef" { EDIT TEXT  READONLY DEFAULT "Roadmap Events" INVISIBLE }
+		PROPERTY "MileKeyGUID" { EDIT TEXT  READONLY DEFAULT "KeyGUID" INVISIBLE }
+
+		CHAPTER "Behavior"
+		PROPERTY "Use Automatic Gradient Fills" {EDIT BOOLEAN DEFAULT "T"}
+		PROPERTY "MilestonesAndPhaseColorsBasedOnTopmostProject" { EDIT BOOLEAN DEFAULT "F" LABEL "Milestones filtered by topmost project, phase colors come from settings in topmost project" HELP "Otherwise drawn according to project contents" }
+		REM "if false, the project is drawn according to the milestones in the project, and the colours stored in the project and milestones"
+		PROPERTY "ShowPinkAsPreMilestoneColorOnly" { EDIT BOOLEAN DEFAULT "F" LABEL "Use pink as the default only for the pre-first milestone color when not filtering" HELP "Otherwise, default for 1st phase drawn is pink" }
+		REM "..., so the first default colour for the phase after the first milestone is red"
+		REM "if false, the first phase drawn is in pink, the second phase drawn is red"
+		PROPERTY "RulesCheckBasedOnTopmostProject" { EDIT BOOLEAN DEFAULT "F" LABEL "Base rules check on topmost project" HELP "Otherwise based on Model Project" }
+		PROPERTY "RunRulesCheckAutomatically" { EDIT BOOLEAN DEFAULT "F" LABEL "Run rules check automatically" HELP "Otherwise run only on request" }
+	}
+
+	Diagram "SV-08 System Evolution Description"
+	{
+		CHAPTER "Introduction"
+		PROPERTY "IsRoadmapDiagram" { edit text readonly default "T" INVISIBLE }
+		PROPERTY "Description" { edit text }
+		PROPERTY "Sym Type for Project" {EDIT NUMERIC  READONLY DEFAULT "625" INVISIBLE }  // Roadmap Item
+		PROPERTY "Sym Type for Milestone" {EDIT NUMERIC  READONLY DEFAULT "628" INVISIBLE }  // Roadmap Event
+		PROPERTY "Sym Type for Dependency" {EDIT NUMERIC  READONLY DEFAULT "629" INVISIBLE }  // Roadmap Dependency
+		PROPERTY "PrjMilestonesRef" { EDIT TEXT  READONLY DEFAULT "Roadmap Events" INVISIBLE }
+		PROPERTY "MileKeyGUID" { EDIT TEXT  READONLY DEFAULT "KeyGUID" INVISIBLE }
+
+		CHAPTER "Behavior"
+		PROPERTY "Use Automatic Gradient Fills" {EDIT BOOLEAN DEFAULT "T"}
+		PROPERTY "MilestonesAndPhaseColorsBasedOnTopmostProject" { EDIT BOOLEAN DEFAULT "F" LABEL "Milestones filtered by topmost project, phase colors come from settings in topmost project" HELP "Otherwise drawn according to project contents" }
+		REM "if false, the project is drawn according to the milestones in the project, and the colours stored in the project and milestones"
+		PROPERTY "ShowPinkAsPreMilestoneColorOnly" { EDIT BOOLEAN DEFAULT "F" LABEL "Use pink as the default only for the pre-first milestone color when not filtering" HELP "Otherwise, default for 1st phase drawn is pink" }
+		REM "..., so the first default colour for the phase after the first milestone is red"
+		REM "if false, the first phase drawn is in pink, the second phase drawn is red"
+		PROPERTY "RulesCheckBasedOnTopmostProject" { EDIT BOOLEAN DEFAULT "F" LABEL "Base rules check on topmost project" HELP "Otherwise based on Model Project" }
+		PROPERTY "RunRulesCheckAutomatically" { EDIT BOOLEAN DEFAULT "F" LABEL "Run rules check automatically" HELP "Otherwise run only on request" }
+	}
+	Diagram "PV-2 Project Timeline"
+	{
+		CHAPTER "Introduction"
+		PROPERTY "IsRoadmapDiagram" { edit text readonly default "T" INVISIBLE }
+		PROPERTY "Description" { edit text }
+		PROPERTY "Sym Type for Project" {EDIT NUMERIC  READONLY DEFAULT "627" INVISIBLE }  // Roadmap Item
+		PROPERTY "Sym Type for Milestone" {EDIT NUMERIC  READONLY DEFAULT "628" INVISIBLE }  // Roadmap Event
+		PROPERTY "Sym Type for Dependency" {EDIT NUMERIC  READONLY DEFAULT "629" INVISIBLE }  // Roadmap Dependency
+		PROPERTY "PrjMilestonesRef" { EDIT TEXT  READONLY DEFAULT "Roadmap Events" INVISIBLE }
+		PROPERTY "MileKeyGUID" { EDIT TEXT  READONLY DEFAULT "KeyGUID" INVISIBLE }
+
+		CHAPTER "Behavior"
+		PROPERTY "Use Automatic Gradient Fills" {EDIT BOOLEAN DEFAULT "T"}
+		PROPERTY "MilestonesAndPhaseColorsBasedOnTopmostProject" { EDIT BOOLEAN DEFAULT "F" LABEL "Milestones filtered by topmost project, phase colors come from settings in topmost project" HELP "Otherwise drawn according to project contents" }
+		REM "if false, the project is drawn according to the milestones in the project, and the colours stored in the project and milestones"
+		PROPERTY "ShowPinkAsPreMilestoneColorOnly" { EDIT BOOLEAN DEFAULT "F" LABEL "Use pink as the default only for the pre-first milestone color when not filtering" HELP "Otherwise, default for 1st phase drawn is pink" }
+		REM "..., so the first default colour for the phase after the first milestone is red"
+		REM "if false, the first phase drawn is in pink, the second phase drawn is red"
+		PROPERTY "RulesCheckBasedOnTopmostProject" { EDIT BOOLEAN DEFAULT "F" LABEL "Base rules check on topmost project" HELP "Otherwise based on Model Project" }
+		PROPERTY "RunRulesCheckAutomatically" { EDIT BOOLEAN DEFAULT "F" LABEL "Run rules check automatically" HELP "Otherwise run only on request" }
+	}
+
+	DEFINITION "Roadmap Group"
+	{
+		PROPERTY "Roadmap Items" {EDIT HETEROGENEOUSLISTOF "Capability", "Project", "VA IT Asset" AND_SUBTYPES DISPLAY {FORMAT LIST LEGEND "Consists of"}}
+	}
+
+	Definition "Capability"
+	{
+		CHAPTER "Roadmap"
+		PROPERTY "Roadmap Events" {   EDIT ListOf  "Roadmap Event"  MIRRORS "Project"  ASGRID   DISPLAY { FORMAT ListNameOnly LEGEND "Roadmap Events" } label "Planned States" }
+		PROPERTY "Pre-First Milestone Color"{   EDIT TEXT ListOnly  LIST  "Colors"}
+		//property "Definition Type" {edit text length 40 label "Type" default "Capability" display {format string} readonly invisible}
+		chapter "Timeline Display"
+		property "Pre-existing" {edit boolean default "T" HELP "Exists before 1st milestone"}
+		property "Unending" {edit boolean default "T" HELP "Exists after last milestone"}
+	}
+	DEFINITION "Project"
+	{
+		CHAPTER "Roadmap"
+		PROPERTY "Roadmap Events" {   EDIT ListOf  "Roadmap Event"  MIRRORS "Project"  ASGRID   DISPLAY { FORMAT ListNameOnly LEGEND "Roadmap Events" } label "Planned States" }
+		PROPERTY "Pre-First Milestone Color"{   EDIT TEXT ListOnly  LIST  "Colors"}
+		//property "Definition Type" {edit text length 40 label "Type" default "Project" display {format string} readonly invisible}
+		chapter "Timeline Display"
+		property "Pre-existing" {edit boolean default "T" HELP "Exists before 1st milestone"}
+		property "Unending" {edit boolean default "T" HELP "Exists after last milestone"}
+	}
+
+	Definition "VA IT Asset"
+	{
+		CHAPTER "Roadmap"
+		PROPERTY "Roadmap Events" {   EDIT ListOf  "Roadmap Event"  MIRRORS "Project"  ASGRID   DISPLAY { FORMAT ListNameOnly LEGEND "Roadmap Events" } label "Planned States" }
+		PROPERTY "Pre-First Milestone Color"{   EDIT TEXT ListOnly  LIST  "Colors"}
+	}
+	DEFINITION "System"
+	{
+		//property "Definition Type" {edit text length 40 label "Type" default "System" display {format string} readonly invisible}
+		chapter "Timeline Display"
+		property "Pre-existing" {edit boolean default "T" HELP "Exists before 1st milestone"}
+		property "Unending" {edit boolean default "T" HELP "Exists after last milestone"}
+	}
+	Definition "System Component"
+	{
+		//property "Definition Type" {edit text length 40 label "Type" default "System Component" display {format string} readonly invisible}
+		chapter "Timeline Display"
+		property "Pre-existing" {edit boolean default "T" HELP "Exists before 1st milestone"}
+		property "Unending" {edit boolean default "T" HELP "Exists after last milestone"}
+	}
+
+#IFDEF "EASEModel"
+	Definition "Component"
+	{
+		//property "Definition Type" {edit text length 40 label "Type" default "Component" display {format string} readonly invisible}
+		chapter "Timeline Display"
+		property "Pre-existing" {edit boolean default "T" HELP "Exists before 1st milestone"}
+		property "Unending" {edit boolean default "T" HELP "Exists after last milestone"}
+	}
+#endif
+
+	DEFINITION "Roadmap Dependency"
+	{
+		Browser { OMITKEY }
+
+		PROPERTY "KeyGUID"{   Key  EDIT TEXT  ASGUID    LENGTH 80 READONLY  INVISIBLE  BROWSER { HIDE }}
+		CHAPTER "Milestones and Decisions"
+		PROPERTY "From Project Milestone"{   EDIT OneOf  "Roadmap Event"  RELATED BY "has parent of"    LABEL "From" READONLY  HELP "Set on Roadmap" FROMDEF}
+		PROPERTY "To Project Milestone"{   EDIT OneOf  "Roadmap Event"  RELATED BY "has child of"    LABEL "To" READONLY  HELP "Set on Roadmap" TODEF}
+		PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
+	}
+
+	DEFINITION "Roadmap Event"
+	{
+		Browser { OMITKEY }
+
+		CHAPTER "Identification"
+		PROPERTY "Project" {   EDIT HETEROGENEOUSONEOF "Capability", "Project", "VA IT Asset" AND_SUBTYPES MIRRORS "Roadmap Events"  FROM_CHOICES_ONLY  REQUIRED    BROWSER { SHOW } label "Roadmap Item"}
+		PROPERTY "Milestone Date" {   EDIT DATE DISPLAY {FORMAT STRING LEGEND ""} label "Life Cycle Event Date"}
+		PROPERTY "KeyGUID"{   Key  EDIT TEXT  ASGUID    LENGTH 80 READONLY  BROWSER { HIDE }}
+
+		CHAPTER "Roadmap Events"
+		Layout {COLS 2 ALIGN OVER}
+		Property "Milestone" {Edit Text ListOnly List "Roadmap Event List" Default "No Outstanding Issues"}
+		Property "Decision" {Edit Text ListOnly List "Roadmap Event List" Default "Not this type"}
+		CHAPTER "Phase"
+		PROPERTY "Following Color" 	{ EDIT TEXT LISTONLY LIST "Colors" }
+	}
+	Symbol "Roadmap Event" REM "User Roadmap Milestone"
+	{
+		REPRESENTS NODE "Roadmap Event"
+		ASSIGN TO "CV-3/CV-4 Capability Phasing and Dependency"
+		Assign To "SV-08 System Evolution Description"
+		ASSIGN TO "PV-2 Project Timeline"
+		PROPERTY "KeyGUID"{   EDIT TEXT  LENGTH 80 READONLY  INVISIBLE  BROWSER { HIDE }}
+
+		Property "Milestone Date"	{Edit Date readonly} 
+		Layout {COLS 2 ALIGN OVER}
+		Group "Project Threads"
+		{
+			Property "Milestone" {Edit Text ListOnly List "Roadmap Event List" Invisible }
+			Property "Decision" {Edit Text ListOnly List "Roadmap Event List" Invisible }	
+		}
+		PROPERTY "Following Color" 	{EDIT TEXT INVISIBLE}
+		DEPICT LIKE "Project Milestone" IN "Roadmap"
+	}
+
+	Symbol "Roadmap Dependency" REM "Roadmap Dependency"
+	{
+		REPRESENTS EXPLICIT RELATIONSHIP "Roadmap Dependency"
+		DEPICT LIKE "Generic Line"
+		DEPICTIONS { MENU "images\lineend1.bmp" }
+		ASSIGN TO "CV-3/CV-4 Capability Phasing and Dependency"
+		Assign To "SV-08 System Evolution Description"
+		ASSIGN TO "PV-2 Project Timeline"
+	}
+
+	Symbol "Capability Timeline" REM "Roadmap Item"
+	{
+		REPRESENTS NODE "Capability" AND_SUBTYPES
+		ASSIGN TO "CV-3/CV-4 Capability Phasing and Dependency"
+		DEPICT LIKE "Project" IN "Roadmap"
+
+		CHAPTER "Symbol"
+		PROPERTY "Show Timeline" {edit boolean default "F" label "Show Timeline Beneath Project Bar"}
+	}
+	Symbol "IT Asset" REM "Roadmap Item"
+	{
+		REPRESENTS NODE "VA IT Asset" AND_SUBTYPES
+		ASSIGN TO "SV-08 System Evolution Description"
+		DEPICT LIKE "Project" IN "Roadmap"
+
+		CHAPTER "Symbol"
+		PROPERTY "Show Timeline" {edit boolean default "F" label "Show Timeline Beneath Project Bar"}
+	}
+	Symbol "Project Timeline" REM "Roadmap Item"
+	{
+		REPRESENTS NODE "Project"
+		ASSIGN TO "PV-2 Project Timeline"
+		DEPICT LIKE "Project" IN "Roadmap"
+
+		CHAPTER "Symbol"
+		PROPERTY "Show Timeline" {edit boolean default "F" label "Show Timeline Beneath Project Bar"}
+	}
+	Symbol "Key" IN "Roadmap"
+	{
+		ASSIGN TO "CV-3/CV-4 Capability Phasing and Dependency"
+		ASSIGN TO "SV-08 System Evolution Description"
+		ASSIGN TO "PV-2 Project Timeline"
+		DEPICTIONS { MENU "images\RoadmapKey.bmp" }
+	}
+
+	SYMBOL "Roadmap Group"
+	{
+		REPRESENTS NODE "Roadmap Group"
+		depict like "Rectangle" in "Roadmap"
+		Assign To "CV-3/CV-4 Capability Phasing and Dependency"
+		ASSIGN TO "SV-08 System Evolution Description"
+		ASSIGN TO "PV-2 Project Timeline"
+	}
+	SYMBOL "Timeline" IN "Roadmap"
+	{
+		Property "Start Date"			{ Edit Date }
+		Property "End Date"			{ Edit Date }
+		Property "Interval Number"		{ Edit Numeric Length 2 }
+		Property "Interval Unit"		{ Edit Text ListOnly List "Interval Units" }
+	}
+
+//Attempt to use Out of Box OMT for SV-10b and c.  Using System and System Interface from VASI for SV/10c but for 10b using non-data centric state chart structures that refer
+//To VEAR data.
+
+Symbol "Object" in "SV-10c System Event-Trace Description"
+{
+	REPRESENTS NODE "VA IT Asset" AND_SUBTYPES
+}
+//Symbol "Event" in "SV-10c System Event-Trace Description"
+//{
+//	REPRESENTS EXPLICIT RELATIONSHIP "System Data Exchange" AND_SUBTYPES
+//}
+Symbol "User 46"
+{
+	Depict Like "Event" in "SV-10c System Event-Trace Description"
+	REPRESENTS EXPLICIT RELATIONSHIP "System Interface" AND_SUBTYPES
+	Assign To "SV-10c System Event-Trace Description"
+	DEPICTIONS { MENU "images\LineEnd1.bmp"  }
+}
+Rename Symbol "User 46" To "System Interface"
+Rename Symbol "Object" in "SV-10c System Event-Trace Description" To "IT Asset"
+Symbol "Event" in "SV-10c System Event-Trace Description"
+{
+	DEASSIGN from "SV-10c System Event-Trace Description"
+}
+
+#IFDEF "UML Object-oriented"
+Rename Definition "Old OO State" To "IT Asset State"
+Rename Definition "Old OO Transition" To "State Transition"
+#endif
+#IFNDEF "UML Object-oriented"
+Rename Definition "OO State" To "IT Asset State"
+Rename Definition "OO Transition" To "State Transition"
+#endif
+Definition "IT Asset State"
+{
+	CHAPTER "Introduction"
+	Property "Represents State Of" {Edit HeterogeneousOneOF "VA IT Asset" AND_SUBTYPES REQUIRED}
+	CHAPTER "Conditions"
+	Property "Pre-Conditions" {Edit ListOf "Pre/Post Condition"}
+	Property "Post-Conditions" {Edit ListOf "Pre/Post Condition"}
+}
+Definition "State Transition"
+{
+	CHAPTER "Events"
+	Property "Triggering Event" {Edit HeterogeneousOneOF "Event", "BPMN Event" }
+	Property "Ending Event" {Edit HeterogeneousOneOF "Event", "BPMN Event" }
+}
+Definition "Pre/Post Condition"
+{
+	Property "Parent Package" { INVISIBLE }
+}
+
+REM "***************************************************************************************************************************************************************"
+REM "***************************************************************************************************************************************************************"
+HIDE DEFINITION "VEAR Root"
+HIDE DEFINITION "VA IT Asset"
+HIDE DEFINITION "VA Operational Action"
+Hide Definition "Old Class"
+Rename Definition "Old Object" To "IT Asset"
+
+#IFDEF "EASEModel"
+
+//USRPROPS NOTE FOR VAAF CONFIGURATION - The EASE Model Meta-Model includes the following VHA Customizations from the VHA encyclopedia.
+//These are taken from the VHA USRPROPS managed by VHA.  The Same USER Definition numbers are used to ensure compatibility should SA encyclopedias ever merge.
+//Adjustments are made to remove properties that would bring in more data than desired (related items that then may themselves have related items and make lists just text
+//All properties are also adjusted to be "Read-only".  THIS SECTION WILL HAVE TO BE REVISITED AS VHA MAKES USRPROPS ADJUSTMENTS ON THEIR END
+//Linking to these is done from the VAEA Controled items above
+//the mappings are in a conditional statement like the one above so that they do not appear unless the EASE Model feature is active.
+//**A decision was made to cut out all but VHA Business Service from the requested VHA structure for the EASE Model.  As such, only test properties remain.
+
+REM "***************************************************************************************************************************************************************"
+REM "*************************************************************  VA EA - VEAR - USRPROPS SECTION   **************************************************************"
+REM "This section to be edited only by the VA EA Office.  For creation of the custom metamodel elements the following applies "
+REM "Definitions - User 1 through User 100 are reserved for VA EA User Only"
+REM "Symbols - User 1 through User 100 are reserved for VA EA Use Only"
+REM "Diagrams - User 1 through User 40 are reserved for VA EA User Only"
+REM "Please Note, for Agency specific customizations, those should use the sections reserved for that agency and also should observe any chanages made to"
+REM "Out of the Box metamodel structure already made in this section."
+
+
+Rename Definition "User 112" To "VHA Business Service"
+
+DEFINITION "VHA Business Service"
+{
+CHAPTER "VHA"
+Property "VHA Business Service UID" { Edit Text Length 50 READONLY}
+Property "VHA Business Service Number" { Edit Text Length 50 READONLY}
+Property "VHA Layer" { EDIT Text READONLY }//LISTONLY List "VHA Business Service Layer" }
+}
+
+DEFINITION "VHA Business Service"
+{
+CHAPTER "VHA Comments"
+Property "VHA Comments" { Edit Text Length 500 READONLY}
+}
+
+#ENDIF
+#Endif
