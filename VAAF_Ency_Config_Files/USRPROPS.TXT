@@ -335,10 +335,10 @@ List "Component Type"
 }
 List "Technical Capability Type"
 {
-	Value "Business Logic"
-	Value "Business Information"
-	Value "Interface"
-	Value "Software"
+	Value "Business Logic Capability"
+	Value "Business Information Capability"
+	Value "Interface Software Capability"
+	Value "Techology Software Capability"
 	Value "N/A"
 }
 List "Software Type"
@@ -523,7 +523,7 @@ Definition "System Interface" RELATIONSHIP LABEL "SystemPartner1-SystemPartner2"
 
 	Chapter "Class & Data Exchanges"
 	//{ TESTPROC TestPropertyValue TESTPROPERTY "Element Id" TESTSTRING { "" } }
-	Property "Class Exchanges" {Edit HeterogeneousListOf "Data Concept","Entity", "Class" Display {Format LIST Legend "DIV-1/2" } Help "Use to specify high level exchanges" }
+	Property "Class Exchanges" {Edit HeterogeneousListOf "Data Concept","Entity", "Class" Display {Format LISTNAMEONLY Legend "$$NONE$$" } Help "Use to specify high level exchanges" }
 	Property "System Data Exchanges" {Edit ListOf "System Data Exchange" Mirrors "System Interface" Help "Use to specify detailed SV-4 exchanges" Display {Format LIST Legend "System Data Exchanges" }}
 }
 
@@ -864,33 +864,35 @@ Definition "Technical Capability"
 	Property "Minispec" {INVISIBLE}
 	DEPICTIONS { DIAGRAM RETAIN STYLE "images\dmSystemFunction.wmf" BORDERS { 1, 2, 1, 2 } MENU "images\dmSystemFunction.bmp"  }
 	SUBTYPE OF "VA Technology Action"
+	CHAPTER "Introduction"
+	Property "Description" {ZOOMABLE EDIT Text LINES 5}
 	Property "Capability Type" {Edit Text ListOnly List "Technical Capability Type" Default "N/A" Help "Choose the Capability Type and click APPLY." UNORDERED 
 		DISPLAY {FORMAT STRING LEGEND "Capability Type"}}
-	Property "Performed by" {Edit HeterogeneousListOf "VA IT Asset" AND_SUBTYPES  }
 	Property "Parent Capability" {Edit OneOf "Technical Capability"}
+	Property "Performed by" {Edit HeterogeneousListOf "VA IT Asset" AND_SUBTYPES  }
 	Chapter "SV-5"
 	Property "Business Functions" {Edit ListOf "Business Function" FROM_CHOICES_ONLY }
 	Chapter "Dependencies"
 	Property "Depends On Technical Capability" {Edit ListOf "Technical Capability" }
 
 	Chapter "Business Logic"
-	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Business Logic" }}
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Business Logic Capability" }}
 	#IFDEF "UML Object-oriented"
-		Property "Activities" {Edit HeterogeneousListOf "Process / Activity", "Action State"}  //allow adding action states from UML activity diagrams
+		Property "Activities" {Edit HeterogeneousListOf "Process / Activity", "Action State" Label "Process/Activities" }  //allow adding action states from UML activity diagrams
 	#ELSE
-		Property "Activities" {Edit ListOf "Process / Activity"}
+		Property "Activities" {Edit ListOf "Process / Activity" Label "Process/Activities"}
 	#ENDIF
 	Chapter "Business Information"
-	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Business Information" }}
-	Property "Concept" {Edit HeterogeneousListOf "VA Information Asset" AND_SUBTYPES}
-
-	Chapter "Interface"
-	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Interface" }}
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Business Information Capability" }}
+	Property "Concept" {Edit HeterogeneousListOf "VA Information Asset" AND_SUBTYPES Label "Information"}
+	Chapter "Interface Software"
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Interface Software Capability" }}
 	Property "Interface Description" {Edit TEXT Length 2000 Lines 5}
 
-	Chapter "Software"
-	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Software" }}
-	Property "Software Capability Description" {Edit TEXT Length 2000 Lines 5}
+	Chapter "Technology Software"
+	{TestProc TestPropertyValue TESTPROPERTY "Capability Type" TESTSTRING { "Techology Software Capability" }}
+	//Property "Software Capability Description" {Edit TEXT Length 2000 Lines 5}
+	Property "Technology" {Edit ListOf "Technology" ASGRID}
 	
 	#IFDEF "EASEModel"
 	CHAPTER "VHA Alignment"
