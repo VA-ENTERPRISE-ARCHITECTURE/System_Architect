@@ -1,5 +1,4 @@
 REM "VAAF USRPROPS.TXT"
-// Version 1.01 - Dec 2018  
 //UNDER NO CIRCUMSTANCES SHOULD THIS FILE BE EDITED OR REPLACED BY AN END USER!  
 //Please contact the appropriate office to request any edits. Changes may cause the encyclopedia to become unusable.
 //Required to Operate:  This USRPROPS and Proper use of the tool also depends on the accompanying USRMATRX.XML and USRDECLAR.CFG files being imported into the encyclopedia
@@ -8,6 +7,14 @@ REM "VAAF USRPROPS.TXT"
 //Import/Update of VEAR data is done via custom VBA macros and CSV data load and that data is extracted from InQuisient (VEAR) via custom "filters" or queries.
 //Freezing of VEAR source primary definition types (Business Function, Organizational Unit and others) is assumed and to be done via macro.  Unfreezing is necessary to update
 
+//Version 1.02 - Feb 2019
+//Version 1.02 Changes
+//Enhancements
+//Change Request #1229 - Added requested attributes to the data modeling diagram properties.
+//Fixes
+//Minor bug fix to ensure that the system hierarchy (parent system) is addressed on the AV-3 diagram
+
+// Version 1.01 - Dec 2018  
 //Version 1.01 Summary of Changes
 //Minor tweeks to unhide properties on system interface not meant to be hidden. Also added many display commands to allow for things like the full name of an item to be displayed
 //edited the ease model properties to allow technical capability type to be displayed and add software to technical capability type list
@@ -634,6 +641,7 @@ Definition "System"
 	Property "Operations Manager" {Edit Text Length 200}
 	Property "OIT Product Manager" {Edit Text Length 200}
 	Property "System Technology" {Edit Text Length 3000 Lines 3}
+	Control "Parent System" {REFPROP "Parent System"}
 }
 
 Definition "Organizational Unit"
@@ -1874,9 +1882,11 @@ Rename Symbol "User 16" To "SysServPartOfNode"
 		DEPICT LIKE "Generic Line"
 		REPRESENTS IMPLICIT RELATIONSHIP "System"."PartOfNodes" AND_SUBTYPES 
 		REPRESENTS IMPLICIT RELATIONSHIP "System"."Product Line" AND_SUBTYPES
+		REPRESENTS IMPLICIT RELATIONSHIP "System"."Parent System" AND_SUBTYPES
 		Assign To "SV-02 System Resource Description" EMBEDDEDBY
 		Assign To "SV-01 System Interface Description" EMBEDDEDBY
 		Assign To "SV-02 System Resource Alternative" EMBEDDEDBY
+		Assign To "AV-3 High Level Architecture" EMBEDDEDBY
 		DEPICTIONS { MENU "images\LineEnd1.bmp"  }
 		PROPERTY "To Line End"{   EDIT TEXT ListOnly  LIST  "LineEnds"  DEFAULT "LineEnd1"    LENGTH 30 INVISIBLE  TOTAG}
 		PROPERTY "Property"{   EDIT TEXT    INVISIBLE   DISPLAY{ FORMAT Script  _FmtImplicitAttribName LEGEND "$$NONE$$" }  }
@@ -2094,6 +2104,26 @@ Definition "Stakeholder"
 }
 #endif
 
+Diagram "DIV-2 Logical Data Model (IDEF1X)"
+{	Chapter "DGC Properties"
+	LAYOUT { ALIGN OVER Cols 2}
+	Property "Bus Data Steward Name" {Edit Text Length 250}
+	Property "Bus Data Steward Office" {Edit OneOf "Organizational Unit" FROM_CHOICES_ONLY}
+	Property "Bus Data Steward Email" {Edit Text Length 250}
+	Property "Bus Data Steward Phone" {Edit Text Length 50}
+	Property "DGC Approval Date" {Edit Text Length 50}
+	Property "DGC Status" {Edit Text ListOnly List "DGC Status"}
+}
+Diagram "DIV-2 Logical Data Model (ERD)"
+{	Chapter "DGC Properties"
+	LAYOUT { ALIGN OVER Cols 2}
+	Property "Bus Data Steward Name" {Edit Text Length 250}
+	Property "Bus Data Steward Office" {Edit OneOf "Organizational Unit" FROM_CHOICES_ONLY}
+	Property "Bus Data Steward Email" {Edit Text Length 250}
+	Property "Bus Data Steward Phone" {Edit Text Length 50}
+	Property "DGC Approval Date" {Edit Text Length 50}
+	Property "DGC Status" {Edit Text ListOnly List "DGC Status"}
+}
 REM "***************************************************************************************************************************************************************"
 REM "*************************************************************************VISTA Structure***********************************************************************"
 Definition "VistA Package"
